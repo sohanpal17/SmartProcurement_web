@@ -16,14 +16,24 @@ import { OfficerTable } from "./components/officers/OfficerTable";
 import { FlagTable } from "./components/flags/FlagTable";
 import { RescheduleModal } from "./components/tokens/RescheduleModal";
 import { FlagModal } from "./components/flags/FlagModal";
+import { LoginModal } from "./components/auth/LoginModal";
 
 function MainLayout() {
-  const { currentDemoRole, selectedFarmerId, setSelectedFarmerId } = useApp();
+  const { authUser, currentDemoRole, selectedFarmerId, setSelectedFarmerId } = useApp();
   const [currentTab, setCurrentTab] = useState("dashboard");
-
-  // Modal States
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [rescheduleFarmer, setRescheduleFarmer] = useState(null);
   const [flagTarget, setFlagTarget] = useState(null); // { farmer, stageKey }
+
+  // AUTH GUARD: If not logged in, enforce Login Screen first!
+  if (!authUser) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+        <LoginModal isOpen={true} onClose={() => {}} />
+        <ToastContainer />
+      </div>
+    );
+  }
 
   const handleOpenReschedule = (farmer) => {
     setRescheduleFarmer(farmer);
@@ -83,8 +93,8 @@ function MainLayout() {
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans text-slate-800 antialiased">
-      {/* Top Header with Sticky Demo Role Switcher */}
-      <Header />
+      {/* Top Header with Sticky Demo Role Switcher & Auth */}
+      <Header onOpenLogin={() => setIsLoginOpen(true)} />
 
       {/* Body Area with Sidebar + Content */}
       <div className="flex-1 flex flex-col md:flex-row">
@@ -94,6 +104,14 @@ function MainLayout() {
           {renderTabContent()}
         </main>
       </div>
+
+      {/* Login Modal */}
+      {isLoginOpen && (
+        <LoginModal
+          isOpen={isLoginOpen}
+          onClose={() => setIsLoginOpen(false)}
+        />
+      )}
 
       {/* Slide-over Farmer Details & Audit Drawer */}
       {selectedFarmerId && (

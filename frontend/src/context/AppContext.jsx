@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import {
   MANDI_INFO,
   ROLES,
@@ -11,14 +11,156 @@ import { getNextStageKey, STAGE_LABELS } from "../utils/queueUtils";
 const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
+  const [authUser, setAuthUser] = useState(() => {
+    const saved = localStorage.getItem("smartprocure_user");
+    return saved ? JSON.parse(saved) : null;
+  });
+
   const [currentDemoRole, setCurrentDemoRole] = useState(ROLES.ADMIN);
-  const [farmers, setFarmers] = useState(INITIAL_FARMERS);
-  const [officers, setOfficers] = useState(INITIAL_OFFICERS);
+  const [farmers, setFarmers] = useState([]);
+  const [officers, setOfficers] = useState([]);
   const [slotConfig, setSlotConfig] = useState(DEFAULT_SLOT_CONFIG);
   const [mandiInfo, setMandiInfo] = useState(MANDI_INFO);
-  const [activeServingTokenId, setActiveServingTokenId] = useState("farmer-023");
+  const [activeServingTokenId, setActiveServingTokenId] = useState(null);
   const [selectedFarmerId, setSelectedFarmerId] = useState(null);
   const [toasts, setToasts] = useState([]);
+
+  // Auto-sync active workstation role when authUser logs in
+  useEffect(() => {
+    if (authUser) {
+      if (authUser.role === "admin") {
+        setCurrentDemoRole("Admin");
+      } else if (authUser.role) {
+        setCurrentDemoRole(authUser.role);
+      }
+    }
+  }, [authUser]);
+
+  // AUTH API INTEGRATION WITH BACKEND (http://localhost:5000/api)
+  const loginUser = async (email, password) => {
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (data.success && data.token) {
+        localStorage.setItem("smartprocure_token", data.token);
+        localStorage.setItem("smartprocure_user", JSON.stringify(data.user));
+        setAuthUser(data.user);
+        if (data.user.role === "admin") {
+          setCurrentDemoRole("Admin");
+        } else if (data.user.role) {
+          setCurrentDemoRole(data.user.role);
+        }
+      }
+      return data;
+    } catch (e) {
+      return { success: false, error: "Unable to connect to Node.js backend server." };
+    }
+  };
+
+  const registerUser = async (userData) => {
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userData),
+      });
+      const data = await res.json();
+      if (data.success && data.user && data.user.isApproved) {
+        localStorage.setItem("smartprocure_token", data.token);
+        localStorage.setItem("smartprocure_user", JSON.stringify(data.user));
+        setAuthUser(data.user);
+      }
+      return data;
+    } catch (e) {
+      return { success: false, error: "Unable to connect to Node.js backend server." };
+    }
+  };
+
+  // REAL OFFICER & QUEUE SYNC FROM BACKEND
+  useEffect(() => {
+    if (!authUser) return;
+
+    const fetchRealData = async () => {
+      try {
+        const token = localStorage.getItem("smartprocure_token");
+        const mandiId = authUser.mandiId || "turbhe";
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+        // 1. Fetch Real Queue Tokens
+        const queueRes = await fetch(`http://localhost:5000/api/queue/mandi-tokens?mandiId=${mandiId}`, { headers });
+        const queueData = await queueRes.json();
+        if (queueData.success && Array.isArray(queueData.queueRecords)) {
+          const mappedRealFarmers = queueData.queueRecords.map((q) => {
+            const b = q.bookings || {};
+            const stageNames = ["arrival", "weighing", "quality", "procurement", "payment"];
+            const currentStageKey = stageNames[Math.min(q.current_stage - 1, 4)];
+            const statusStr = q.current_stage === 6 ? "COMPLETED" : currentStageKey.toUpperCase();
+
+            return {
+              id: q.id || q.booking_id,
+              tokenNumber: q.token_number,
+              farmerName: b.farmer_name || "Farmer",
+              phone: "9876543210",
+              commodity: b.commodity_name || "Crop",
+              declaredWeight: b.quantity_quintals || 0,
+              slot: "Morning",
+              batch: b.time_range || "07:00 AM – 08:00 AM",
+              status: statusStr,
+              arrivalStatus: q.current_stage > 1 ? "ARRIVED" : "BOOKED",
+              currentStage: currentStageKey,
+              queuePosition: q.people_ahead || 0,
+              estimatedWaitMins: q.estimated_wait_mins || 0,
+              stages: {
+                arrival: { status: q.current_stage > 1 ? "COMPLETED" : "ACTIVE" },
+                weighing: { status: q.current_stage > 2 ? "COMPLETED" : q.current_stage === 2 ? "ACTIVE" : "LOCKED" },
+                quality: { status: q.current_stage > 3 ? "COMPLETED" : q.current_stage === 3 ? "ACTIVE" : "LOCKED" },
+                procurement: { status: q.current_stage > 4 ? "COMPLETED" : q.current_stage === 4 ? "ACTIVE" : "LOCKED" },
+                payment: { status: q.current_stage > 5 ? "COMPLETED" : q.current_stage === 5 ? "ACTIVE" : "LOCKED" },
+              },
+              flags: [],
+              history: [{ timestamp: new Date(q.updated_at).toLocaleTimeString(), event: "Token Synced from Backend", actor: "System" }],
+            };
+          });
+          setFarmers(mappedRealFarmers);
+        }
+
+        // 2. Fetch Real Officer Requests (Admin only)
+        if (authUser.role === "admin") {
+          const offRes = await fetch(`http://localhost:5000/api/auth/pending-officers?mandiId=${mandiId}`, { headers });
+          const offData = await offRes.json();
+          if (offData.success && Array.isArray(offData.officers)) {
+            const mappedOfficers = offData.officers.map((o) => ({
+              id: o.id,
+              name: o.full_name || o.email,
+              phone: o.phone || "9876543210",
+              email: o.email,
+              mandi: o.mandi_id ? o.mandi_id.toUpperCase() : "Turbhe",
+              role: o.role === "officer" ? ROLES.ARRIVAL : o.role,
+              status: o.is_approved ? "ACTIVE" : "PENDING",
+              requestDate: new Date(o.created_at).toLocaleDateString(),
+            }));
+            setOfficers(mappedOfficers);
+          }
+        }
+      } catch (err) {
+        console.error("Real Data Sync Error:", err);
+      }
+    };
+
+    fetchRealData();
+    const interval = setInterval(fetchRealData, 4000);
+    return () => clearInterval(interval);
+  }, [authUser]);
+
+  const logoutUser = () => {
+    localStorage.removeItem("smartprocure_token");
+    localStorage.removeItem("smartprocure_user");
+    setAuthUser(null);
+  };
 
   // Toast notification helper
   const addToast = (message, type = "success") => {
@@ -39,35 +181,55 @@ export const AppProvider = ({ children }) => {
     return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
-  // Admin Officer Management
-  const approveOfficer = (officerId) => {
-    setOfficers((prev) =>
-      prev.map((off) => {
-        if (off.id === officerId) {
-          return {
-            ...off,
-            status: "ACTIVE",
-            joinedDate: new Date().toISOString().split("T")[0],
-          };
-        }
-        return off;
-      })
-    );
-    const target = officers.find((o) => o.id === officerId);
-    addToast(`Approved officer request for ${target?.name || "Officer"}`, "success");
+  // Admin Officer Approval Methods via Backend API
+  const approveOfficer = async (officerId) => {
+    try {
+      const token = localStorage.getItem("smartprocure_token");
+      const res = await fetch("http://localhost:5000/api/auth/approve-officer", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ officerId, approve: true }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setOfficers((prev) =>
+          prev.map((off) => (off.id === officerId ? { ...off, status: "ACTIVE" } : off))
+        );
+        addToast("Officer approved successfully!", "success");
+      } else {
+        addToast(data.error || "Approval failed.", "error");
+      }
+    } catch (e) {
+      addToast("Failed to connect to server.", "error");
+    }
   };
 
-  const rejectOfficer = (officerId, reason = "Request rejected by Admin") => {
-    setOfficers((prev) =>
-      prev.map((off) => {
-        if (off.id === officerId) {
-          return { ...off, status: "REJECTED", rejectedReason: reason };
-        }
-        return off;
-      })
-    );
-    const target = officers.find((o) => o.id === officerId);
-    addToast(`Rejected officer request for ${target?.name || "Officer"}`, "error");
+  const rejectOfficer = async (officerId, reason = "Request rejected by Mandi Admin") => {
+    try {
+      const token = localStorage.getItem("smartprocure_token");
+      const res = await fetch("http://localhost:5000/api/auth/approve-officer", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ officerId, approve: false }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setOfficers((prev) =>
+          prev.map((off) => (off.id === officerId ? { ...off, status: "REJECTED", rejectedReason: reason } : off))
+        );
+        addToast("Officer request rejected.", "error");
+      } else {
+        addToast(data.error || "Rejection failed.", "error");
+      }
+    } catch (e) {
+      addToast("Failed to connect to server.", "error");
+    }
   };
 
   const addOfficerRequest = (newOfficerData) => {
@@ -405,6 +567,10 @@ export const AppProvider = ({ children }) => {
   return (
     <AppContext.Provider
       value={{
+        authUser,
+        loginUser,
+        registerUser,
+        logoutUser,
         currentDemoRole,
         setCurrentDemoRole,
         farmers,

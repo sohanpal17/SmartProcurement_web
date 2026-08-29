@@ -9,8 +9,8 @@ import {
   ChevronDown,
 } from "lucide-react";
 
-export const Header = () => {
-  const { currentDemoRole, setCurrentDemoRole, mandiInfo, farmers, officers } = useApp();
+export const Header = ({ onOpenLogin }) => {
+  const { authUser, logoutUser, mandiInfo, farmers, officers } = useApp();
   const [timeStr, setTimeStr] = useState("");
 
   useEffect(() => {
@@ -76,26 +76,31 @@ export const Header = () => {
           )}
         </div>
 
-        {/* Right Sticky Demo Role Switcher */}
-        <div className="flex items-center gap-2 bg-[#173763] p-1.5 rounded-xl border border-blue-400/30">
-          <span className="text-xs text-blue-200 font-semibold pl-2 hidden sm:inline whitespace-nowrap">
-            Viewing Context:
-          </span>
-          <div className="relative">
-            <select
-              value={currentDemoRole}
-              onChange={(e) => setCurrentDemoRole(e.target.value)}
-              className="bg-[#2563EB] hover:bg-[#1d4ed8] text-white font-bold text-xs py-1.5 pl-3 pr-8 rounded-lg appearance-none focus:outline-none cursor-pointer transition-colors shadow-sm"
+        {/* Right User Account & Logout Controls */}
+        <div className="flex items-center gap-3">
+          {authUser ? (
+            <div className="flex items-center gap-3 bg-[#173763] px-3.5 py-1.5 rounded-xl border border-blue-400/30">
+              <div className="flex flex-col text-right">
+                <span className="text-xs font-bold text-white">{authUser.fullName || authUser.email}</span>
+                <span className="text-[11px] font-semibold text-emerald-400">
+                  {authUser.role === "admin" ? "👑 Mandi Admin" : `👮 ${authUser.role?.toUpperCase() || "Officer"}`} • {authUser.mandiId?.toUpperCase() || "Turbhe"}
+                </span>
+              </div>
+              <button
+                onClick={logoutUser}
+                className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition shadow-sm"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onOpenLogin}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow-sm flex items-center gap-1.5"
             >
-              <option value={ROLES.ADMIN}>Admin (Mandi Director)</option>
-              <option value={ROLES.ARRIVAL}>Arrival & Token Officer</option>
-              <option value={ROLES.WEIGHING}>Weighing Officer</option>
-              <option value={ROLES.QUALITY}>Quality Check Officer</option>
-              <option value={ROLES.PROCUREMENT}>Procurement Status Officer</option>
-              <option value={ROLES.PAYMENT}>Payment Status Officer</option>
-            </select>
-            <ChevronDown className="w-3.5 h-3.5 text-white absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-          </div>
+              <span>🔑 Login / Signup</span>
+            </button>
+          )}
         </div>
       </div>
 

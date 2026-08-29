@@ -22,17 +22,9 @@ export const OfficerTable = () => {
         <div>
           <h2 className="text-xl font-black text-slate-900">Officer Registration & Staff Directory</h2>
           <p className="text-xs text-slate-500 mt-1">
-            Department of Agricultural Marketing - Verify officer profiles and assigned operational roles.
+            Department of Agricultural Marketing - Review officer signup requests and manage active staff.
           </p>
         </div>
-
-        <button
-          onClick={() => setIsRegisterModalOpen(true)}
-          className="px-4 py-2.5 bg-[#102A56] hover:bg-[#173763] text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-2 cursor-pointer"
-        >
-          <UserPlus className="w-4 h-4 text-amber-400" />
-          <span>Submit Officer Profile Request</span>
-        </button>
       </div>
 
       {/* Filter Tabs */}
