@@ -14,6 +14,7 @@ export const TokenCard = ({ farmer, onOpenReschedule, onOpenFlag, onOpenFarmerDe
     markLate,
     callNextToken,
     completeStage,
+    cancelBooking,
     activeServingTokenId,
   } = useApp();
 
@@ -22,12 +23,26 @@ export const TokenCard = ({ farmer, onOpenReschedule, onOpenFlag, onOpenFarmerDe
   const isCurrentServing = activeServingTokenId === farmer.id;
 
   const requiredOfficerRole = getStageOfficerRole(currentStageKey);
+  const normRole = (currentDemoRole || "").toLowerCase();
+  const normReq = (requiredOfficerRole || "").toLowerCase();
+
+  const isRoleMatch =
+    currentDemoRole === ROLES.ADMIN ||
+    normRole === normReq ||
+    (currentStageKey === "procurement" && normRole.includes("procurement")) ||
+    (currentStageKey === "weighing" && normRole.includes("weighing")) ||
+    (currentStageKey === "quality" && normRole.includes("quality")) ||
+    (currentStageKey === "arrival" && normRole.includes("arrival")) ||
+    (currentStageKey === "payment" && normRole.includes("payment"));
+
   const isMyActionableStage =
-    currentDemoRole === requiredOfficerRole &&
-    (currentStageInfo?.status === "ACTIVE" || currentStageInfo?.status === "PENDING");
+    isRoleMatch &&
+    farmer.status !== "COMPLETED" &&
+    farmer.status !== "FLAGGED";
 
   const canArrivalManage =
-    currentDemoRole === ROLES.ARRIVAL && farmer.status !== "COMPLETED";
+    (currentDemoRole === ROLES.ADMIN || normRole.includes("arrival") || normRole.includes("admin")) &&
+    farmer.status !== "COMPLETED";
 
   return (
     <div
@@ -40,7 +55,7 @@ export const TokenCard = ({ farmer, onOpenReschedule, onOpenFlag, onOpenFarmerDe
         <div className="flex items-center gap-3.5">
           {/* Big Token Number Display */}
           <span className="text-xl sm:text-2xl font-black text-slate-900 bg-slate-100 px-3.5 py-1.5 rounded-xl font-mono border border-slate-200 tracking-tight">
-            {farmer.tokenNumber}
+            {farmer.tokenNumber || farmer.token_number || farmer.token_no || `TBR-${farmer.id}`}
           </span>
           <div>
             <div className="flex items-center gap-2">
@@ -62,7 +77,7 @@ export const TokenCard = ({ farmer, onOpenReschedule, onOpenFlag, onOpenFarmerDe
               <span>•</span>
               <span>{farmer.slot} ({farmer.batch})</span>
               <span>•</span>
-              <span className="font-semibold text-slate-800">{farmer.crop}</span>
+              <span className="font-semibold text-slate-800">{farmer.crop || farmer.commodity || "Crop"}</span>
             </p>
           </div>
         </div>
@@ -161,6 +176,12 @@ export const TokenCard = ({ farmer, onOpenReschedule, onOpenFlag, onOpenFarmerDe
                     className="px-4 py-2 bg-[#102A56] hover:bg-[#16376c] text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs cursor-pointer"
                   >
                     Reschedule
+                  </button>
+                  <button
+                    onClick={() => cancelBooking(farmer.id)}
+                    className="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs sm:text-sm font-semibold border border-rose-200 cursor-pointer"
+                  >
+                    Cancel Booking
                   </button>
                 </>
               )}

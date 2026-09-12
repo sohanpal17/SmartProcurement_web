@@ -18,10 +18,10 @@ export const FarmersPage = ({ onOpenFarmerDetails }) => {
     const q = searchTerm.toLowerCase();
     filtered = filtered.filter(
       (f) =>
-        f.tokenNumber.toLowerCase().includes(q) ||
-        f.farmerName.toLowerCase().includes(q) ||
-        f.phone.includes(q) ||
-        f.crop.toLowerCase().includes(q)
+        (f.tokenNumber || f.token_number || "").toLowerCase().includes(q) ||
+        (f.farmerName || "").toLowerCase().includes(q) ||
+        (f.phone || "").includes(q) ||
+        (f.crop || f.commodity || "").toLowerCase().includes(q)
     );
   }
 
@@ -93,7 +93,7 @@ export const FarmersPage = ({ onOpenFarmerDetails }) => {
                 filtered.map((f) => (
                   <tr key={f.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="px-6 py-4 font-mono font-black text-slate-900 text-sm">
-                      {f.tokenNumber}
+                      {f.tokenNumber || f.token_number || f.token_no || `TBR-${f.id}`}
                     </td>
                     <td className="px-6 py-4 font-bold text-slate-900">
                       <div className="flex items-center gap-1.5">
@@ -102,7 +102,7 @@ export const FarmersPage = ({ onOpenFarmerDetails }) => {
                       </div>
                     </td>
                     <td className="px-6 py-4 font-mono">{f.phone}</td>
-                    <td className="px-6 py-4 font-medium text-slate-700">{f.crop}</td>
+                    <td className="px-6 py-4 font-medium text-slate-700">{f.crop || f.commodity || "Crop"}</td>
                     <td className="px-6 py-4 text-slate-600">
                       {f.slot} • {f.batch}
                     </td>

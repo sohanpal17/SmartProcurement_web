@@ -145,3 +145,40 @@ exports.getFarmerBookings = async (req, res) => {
         return res.status(500).json({ success: false, error: err.message });
     }
 };
+
+// 4. CANCEL BOOKING (For Farmers / Mobile App / Web Admin)
+exports.cancelBooking = async (req, res) => {
+    try {
+        const { bookingId, tokenNumber, farmerId } = req.body;
+
+        if (!bookingId && !tokenNumber) {
+            return res.status(400).json({ success: false, error: 'bookingId or tokenNumber is required to cancel a booking.' });
+        }
+
+        const targetKey = bookingId || tokenNumber;
+
+        // 1. Remove from active memory queueStore
+        queueStore.removeBookingOrToken(targetKey);
+
+        // 2. Update status in Supabase if database connection is available
+        try {
+            if (bookingId) {
+                await supabase.from('bookings').update({ status: 'Cancelled' }).eq('id', bookingId);
+                await supabase.from('queue_records').delete().eq('booking_id', bookingId);
+            } else if (tokenNumber) {
+                await supabase.from('bookings').update({ status: 'Cancelled' }).eq('token_number', tokenNumber);
+                await supabase.from('queue_records').delete().eq('token_number', tokenNumber);
+            }
+        } catch (dbErr) {
+            console.log('Supabase cancel sync warning (using memory queueStore):', dbErr.message);
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: `Booking ${tokenNumber || bookingId} cancelled successfully.`,
+            cancelledKey: targetKey,
+        });
+    } catch (err) {
+        return res.status(500).json({ success: false, error: err.message });
+    }
+};

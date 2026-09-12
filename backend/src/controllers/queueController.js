@@ -106,11 +106,21 @@ exports.getMandiQueueTokens = async (req, res) => {
             // Memory records fallback
         }
 
-        // Combine DB and Memory records (avoid duplicates by token_number)
+        // Combine DB and Memory records (prefer updated memory store records)
         const combinedMap = new Map();
-        [...memRecords, ...dbRecords].forEach((r) => {
+        dbRecords.forEach((r) => {
             if (r && r.token_number) {
-                combinedMap.set(r.token_number, r);
+                combinedMap.set(r.token_number.toLowerCase(), r);
+            }
+        });
+
+        memRecords.forEach((r) => {
+            if (r && r.token_number) {
+                const key = r.token_number.toLowerCase();
+                const existing = combinedMap.get(key);
+                if (!existing || (r.current_stage || 1) >= (existing.current_stage || 1)) {
+                    combinedMap.set(key, r);
+                }
             }
         });
 

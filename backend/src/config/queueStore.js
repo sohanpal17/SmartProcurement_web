@@ -19,7 +19,9 @@ class QueueStore {
   }
 
   updateStage(tokenNumber, newStageIndex) {
-    const record = this.queueRecords.find((q) => q.token_number === tokenNumber);
+    if (!tokenNumber) return null;
+    const searchToken = tokenNumber.trim().toLowerCase();
+    const record = this.queueRecords.find((q) => (q.token_number || '').toLowerCase() === searchToken);
     if (record) {
       record.current_stage = parseInt(newStageIndex);
       let peopleAhead = 0;
@@ -38,6 +40,17 @@ class QueueStore {
       return record;
     }
     return null;
+  }
+
+  removeBookingOrToken(searchKey) {
+    if (!searchKey) return;
+    const key = String(searchKey).trim().toLowerCase();
+    this.bookings = this.bookings.filter(
+      (b) => (b.id || '').toLowerCase() !== key && (b.token_number || '').toLowerCase() !== key && (b.booking_ref || '').toLowerCase() !== key
+    );
+    this.queueRecords = this.queueRecords.filter(
+      (q) => (q.id || '').toLowerCase() !== key && (q.booking_id || '').toLowerCase() !== key && (q.token_number || '').toLowerCase() !== key
+    );
   }
 }
 

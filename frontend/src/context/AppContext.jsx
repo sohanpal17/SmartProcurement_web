@@ -80,6 +80,25 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  // Helper to sync stage updates to backend
+  const updateBackendStage = async (tokenNumber, newStageIndex) => {
+    if (!tokenNumber) return;
+    try {
+      const token = localStorage.getItem("smartprocure_token");
+      const headers = {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      };
+      await fetch("http://localhost:5000/api/queue/update-stage", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ tokenNumber, newStageIndex }),
+      });
+    } catch (err) {
+      console.error("Failed to sync stage update to backend:", err);
+    }
+  };
+
   // REAL OFFICER & QUEUE SYNC FROM BACKEND
   useEffect(() => {
     if (!authUser) return;
@@ -94,38 +113,62 @@ export const AppProvider = ({ children }) => {
         const queueRes = await fetch(`http://localhost:5000/api/queue/mandi-tokens?mandiId=${mandiId}`, { headers });
         const queueData = await queueRes.json();
         if (queueData.success && Array.isArray(queueData.queueRecords)) {
-          const mappedRealFarmers = queueData.queueRecords.map((q) => {
-            const b = q.bookings || {};
-            const stageNames = ["arrival", "weighing", "quality", "procurement", "payment"];
-            const currentStageKey = stageNames[Math.min(q.current_stage - 1, 4)];
-            const statusStr = q.current_stage === 6 ? "COMPLETED" : currentStageKey.toUpperCase();
+          setFarmers((prevFarmers) => {
+            return queueData.queueRecords.map((q) => {
+              const b = q.bookings || {};
+              const existing = prevFarmers.find(
+                (f) => f.tokenNumber === q.token_number || f.id === q.id || f.id === q.booking_id
+              );
 
-            return {
-              id: q.id || q.booking_id,
-              tokenNumber: q.token_number,
-              farmerName: b.farmer_name || "Farmer",
-              phone: "9876543210",
-              commodity: b.commodity_name || "Crop",
-              declaredWeight: b.quantity_quintals || 0,
-              slot: "Morning",
-              batch: b.time_range || "07:00 AM – 08:00 AM",
-              status: statusStr,
-              arrivalStatus: q.current_stage > 1 ? "ARRIVED" : "BOOKED",
-              currentStage: currentStageKey,
-              queuePosition: q.people_ahead || 0,
-              estimatedWaitMins: q.estimated_wait_mins || 0,
-              stages: {
-                arrival: { status: q.current_stage > 1 ? "COMPLETED" : "ACTIVE" },
-                weighing: { status: q.current_stage > 2 ? "COMPLETED" : q.current_stage === 2 ? "ACTIVE" : "LOCKED" },
-                quality: { status: q.current_stage > 3 ? "COMPLETED" : q.current_stage === 3 ? "ACTIVE" : "LOCKED" },
-                procurement: { status: q.current_stage > 4 ? "COMPLETED" : q.current_stage === 4 ? "ACTIVE" : "LOCKED" },
-                payment: { status: q.current_stage > 5 ? "COMPLETED" : q.current_stage === 5 ? "ACTIVE" : "LOCKED" },
-              },
-              flags: [],
-              history: [{ timestamp: new Date(q.updated_at).toLocaleTimeString(), event: "Token Synced from Backend", actor: "System" }],
-            };
+              const stageNames = ["arrival", "weighing", "quality", "procurement", "payment"];
+              
+              let localStageIndex = 1;
+              if (existing) {
+                const idx = stageNames.indexOf(existing.currentStage);
+                localStageIndex = existing.status === "COMPLETED" ? 6 : (idx >= 0 ? idx + 1 : 1);
+              }
+
+              const effectiveStage = Math.max(q.current_stage || 1, localStageIndex);
+              const currentStageKey = stageNames[Math.min(effectiveStage - 1, 4)];
+
+              let statusStr = effectiveStage === 6 ? "COMPLETED" : currentStageKey.toUpperCase();
+              if (existing && (existing.status === "LATE" || existing.status === "FLAGGED") && effectiveStage === localStageIndex) {
+                statusStr = existing.status;
+              }
+
+              return {
+                id: q.id || q.booking_id,
+                tokenNumber: q.token_number || b.token_number || existing?.tokenNumber,
+                farmerName: b.farmer_name || existing?.farmerName || "Farmer",
+                phone: existing?.phone || "9876543210",
+                commodity: b.commodity_name || existing?.commodity || "Crop",
+                crop: b.commodity_name || existing?.crop || existing?.commodity || "Crop",
+                farmerIdNum: b.display_farmer_id || existing?.farmerIdNum || "FMR-7128912345",
+                declaredWeight: b.quantity_quintals || existing?.declaredWeight || 0,
+                expectedQuantityQuintals: b.quantity_quintals || existing?.expectedQuantityQuintals || 0,
+                measuredWeightQuintals: existing?.measuredWeightQuintals || null,
+                qualityGrade: existing?.qualityGrade || null,
+                procurementRatePerQuintal: existing?.procurementRatePerQuintal || null,
+                transactionRef: existing?.transactionRef || null,
+                slot: existing?.slot || "Morning",
+                batch: b.time_range || existing?.batch || "07:00 AM – 08:00 AM",
+                status: statusStr,
+                arrivalStatus: effectiveStage > 1 ? "ARRIVED" : (existing?.arrivalStatus || "BOOKED"),
+                currentStage: currentStageKey,
+                queuePosition: q.people_ahead || 0,
+                estimatedWaitMins: q.estimated_wait_mins || 0,
+                stages: {
+                  arrival: { status: effectiveStage > 1 ? "COMPLETED" : "ACTIVE", ...existing?.stages?.arrival },
+                  weighing: { status: effectiveStage > 2 ? "COMPLETED" : effectiveStage === 2 ? "ACTIVE" : "LOCKED", ...existing?.stages?.weighing },
+                  quality: { status: effectiveStage > 3 ? "COMPLETED" : effectiveStage === 3 ? "ACTIVE" : "LOCKED", ...existing?.stages?.quality },
+                  procurement: { status: effectiveStage > 4 ? "COMPLETED" : effectiveStage === 4 ? "ACTIVE" : "LOCKED", ...existing?.stages?.procurement },
+                  payment: { status: effectiveStage > 5 ? "COMPLETED" : effectiveStage === 5 ? "ACTIVE" : "LOCKED", ...existing?.stages?.payment },
+                },
+                flags: existing?.flags || [],
+                history: existing?.history || [{ timestamp: new Date(q.updated_at).toLocaleTimeString(), event: "Token Synced from Backend", actor: "System" }],
+              };
+            });
           });
-          setFarmers(mappedRealFarmers);
         }
 
         // 2. Fetch Real Officer Requests (Admin only)
@@ -246,14 +289,22 @@ export const AppProvider = ({ children }) => {
 
   // Arrival & Token Officer Queue Controls
   const markArrived = (farmerId) => {
+    let targetToken = null;
     setFarmers((prev) =>
       prev.map((f) => {
         if (f.id === farmerId) {
+          targetToken = f.tokenNumber;
           const timestamp = getNowFormatted();
           return {
             ...f,
             status: "ARRIVED",
             arrivalStatus: "ARRIVED",
+            currentStage: "weighing",
+            stages: {
+              ...f.stages,
+              arrival: { ...f.stages.arrival, status: "COMPLETED", completedAt: timestamp },
+              weighing: { ...f.stages.weighing, status: "ACTIVE" },
+            },
             history: [
               ...f.history,
               {
@@ -268,6 +319,10 @@ export const AppProvider = ({ children }) => {
       })
     );
     const target = farmers.find((f) => f.id === farmerId);
+    const tokenToSync = targetToken || target?.tokenNumber;
+    if (tokenToSync) {
+      updateBackendStage(tokenToSync, 2);
+    }
     addToast(`Marked ${target?.tokenNumber} (${target?.farmerName}) as ARRIVED`, "success");
   };
 
@@ -299,9 +354,11 @@ export const AppProvider = ({ children }) => {
 
   const callNextToken = (farmerId) => {
     setActiveServingTokenId(farmerId);
+    let targetToken = null;
     setFarmers((prev) =>
       prev.map((f) => {
         if (f.id === farmerId) {
+          targetToken = f.tokenNumber;
           const timestamp = getNowFormatted();
           const nextStages = { ...f.stages };
           if (nextStages.arrival.status !== "COMPLETED") {
@@ -334,7 +391,34 @@ export const AppProvider = ({ children }) => {
       })
     );
     const target = farmers.find((f) => f.id === farmerId);
+    const tokenToSync = targetToken || target?.tokenNumber;
+    if (tokenToSync) {
+      updateBackendStage(tokenToSync, 2);
+    }
     addToast(`NOW SERVING Token ${target?.tokenNumber} (${target?.farmerName})`, "info");
+  };
+
+  const cancelBooking = async (farmerIdOrToken) => {
+    const target = farmers.find((f) => f.id === farmerIdOrToken || f.tokenNumber === farmerIdOrToken);
+    const tokenToCancel = target?.tokenNumber || farmerIdOrToken;
+    const bookingIdToCancel = target?.id;
+
+    setFarmers((prev) => prev.filter((f) => f.id !== farmerIdOrToken && f.tokenNumber !== farmerIdOrToken));
+
+    try {
+      const token = localStorage.getItem("smartprocure_token");
+      await fetch("http://localhost:5000/api/bookings/cancel", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ bookingId: bookingIdToCancel, tokenNumber: tokenToCancel }),
+      });
+      addToast(`Booking ${tokenToCancel} has been cancelled successfully`, "info");
+    } catch (err) {
+      console.error("Cancel sync error:", err);
+    }
   };
 
   const rescheduleToken = (farmerId, newSlot, newBatch, reason) => {
@@ -372,9 +456,14 @@ export const AppProvider = ({ children }) => {
 
   // Workflow Stage Completion
   const completeStage = (farmerId, stageKey, payload = {}) => {
+    let targetTokenNumber = null;
+    let newStageNum = 2;
+    const stageIndexMap = { arrival: 2, weighing: 3, quality: 4, procurement: 5, payment: 6 };
+
     setFarmers((prev) =>
       prev.map((f) => {
         if (f.id === farmerId) {
+          targetTokenNumber = f.tokenNumber;
           const timestamp = getNowFormatted();
           const nextStages = { ...f.stages };
 
@@ -404,6 +493,8 @@ export const AppProvider = ({ children }) => {
             newOverallStatus = "COMPLETED";
             newCurrentStage = "payment";
           }
+
+          newStageNum = stageIndexMap[stageKey] || 6;
 
           // Build audit entry
           let detailStr = "";
@@ -440,6 +531,11 @@ export const AppProvider = ({ children }) => {
     );
 
     const target = farmers.find((f) => f.id === farmerId);
+    const tokenToSync = targetTokenNumber || target?.tokenNumber;
+    if (tokenToSync) {
+      updateBackendStage(tokenToSync, newStageNum);
+    }
+
     if (stageKey === "payment") {
       addToast(`Payment & Procurement Completed for Token ${target?.tokenNumber}! Token moved to History.`, "success");
     } else {
@@ -591,6 +687,7 @@ export const AppProvider = ({ children }) => {
         markLate,
         callNextToken,
         rescheduleToken,
+        cancelBooking,
         completeStage,
         flagStage,
         resolveFlag,
