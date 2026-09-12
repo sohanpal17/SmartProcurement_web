@@ -13,7 +13,6 @@ export const OfficerStageDashboard = ({ onOpenFlag, onOpenFarmerDetails }) => {
   let stageKey = "weighing";
   if (currentDemoRole.includes("Weighing")) stageKey = "weighing";
   else if (currentDemoRole.includes("Quality")) stageKey = "quality";
-  else if (currentDemoRole.includes("Procurement")) stageKey = "procurement";
   else if (currentDemoRole.includes("Payment")) stageKey = "payment";
 
   const myActionableTokens = activeTokens.filter(

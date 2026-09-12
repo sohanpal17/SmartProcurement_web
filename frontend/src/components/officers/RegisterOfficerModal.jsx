@@ -82,7 +82,6 @@ export const RegisterOfficerModal = ({ isOpen, onClose }) => {
             <option value={ROLES.ARRIVAL}>{ROLES.ARRIVAL}</option>
             <option value={ROLES.WEIGHING}>{ROLES.WEIGHING}</option>
             <option value={ROLES.QUALITY}>{ROLES.QUALITY}</option>
-            <option value={ROLES.PROCUREMENT}>{ROLES.PROCUREMENT}</option>
             <option value={ROLES.PAYMENT}>{ROLES.PAYMENT}</option>
           </select>
         </div>

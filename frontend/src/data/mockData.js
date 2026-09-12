@@ -18,7 +18,6 @@ export const ROLES = {
   ARRIVAL: "Arrival & Token Officer",
   WEIGHING: "Weighing Officer",
   QUALITY: "Quality Check Officer",
-  PROCUREMENT: "Procurement Status Officer",
   PAYMENT: "Payment Status Officer",
 };
 

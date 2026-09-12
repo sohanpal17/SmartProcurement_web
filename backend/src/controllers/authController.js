@@ -18,7 +18,6 @@ const PRESEEDED_OFFICERS = {
     'tofficer1@gmail.com': { password: '123456', name: 'Turbhe Arrival Officer', role: 'Arrival & Token Officer', mandiId: 'turbhe' },
     'tofficer2@gmail.com': { password: '123456', name: 'Turbhe Weighing Officer', role: 'Weighing Officer', mandiId: 'turbhe' },
     'tofficer3@gmail.com': { password: '123456', name: 'Turbhe Quality Officer', role: 'Quality Check Officer', mandiId: 'turbhe' },
-    'tofficer4@gmail.com': { password: '123456', name: 'Turbhe Procurement Officer', role: 'Procurement & Price Officer', mandiId: 'turbhe' },
     'tofficer5@gmail.com': { password: '123456', name: 'Turbhe Payment Officer', role: 'Payment Officer', mandiId: 'turbhe' },
 };
 

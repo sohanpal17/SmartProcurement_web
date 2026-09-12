@@ -37,13 +37,6 @@ export const PERMISSIONS = {
     "view_flags",
     "view_history",
   ],
-  [ROLES.PROCUREMENT]: [
-    "view_tokens",
-    "complete_procurement",
-    "flag_procurement",
-    "view_flags",
-    "view_history",
-  ],
   [ROLES.PAYMENT]: [
     "view_tokens",
     "complete_payment",
@@ -66,8 +59,6 @@ export const getStageOfficerRole = (stageKey) => {
       return ROLES.WEIGHING;
     case "quality":
       return ROLES.QUALITY;
-    case "procurement":
-      return ROLES.PROCUREMENT;
     case "payment":
       return ROLES.PAYMENT;
     default:

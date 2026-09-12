@@ -29,7 +29,6 @@ export const TokenCard = ({ farmer, onOpenReschedule, onOpenFlag, onOpenFarmerDe
   const isRoleMatch =
     currentDemoRole === ROLES.ADMIN ||
     normRole === normReq ||
-    (currentStageKey === "procurement" && normRole.includes("procurement")) ||
     (currentStageKey === "weighing" && normRole.includes("weighing")) ||
     (currentStageKey === "quality" && normRole.includes("quality")) ||
     (currentStageKey === "arrival" && normRole.includes("arrival")) ||

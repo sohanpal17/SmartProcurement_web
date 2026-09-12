@@ -91,7 +91,7 @@ export function LoginModal({ isOpen, onClose }) {
             {authUser
               ? `Logged in as ${authUser.fullName} (${authUser.role})`
               : isRegisterMode
-              ? "Register a new Procurement Officer account for Mandi Admin approval"
+              ? "Register a new Officer account for Mandi Admin approval"
               : "Sign in with Mandi Admin or Officer credentials"}
           </p>
         </div>
@@ -167,7 +167,7 @@ export function LoginModal({ isOpen, onClose }) {
 
                 <div>
                   <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Quick Turbhe Officer Logins:</div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-[11px]">
+                  <div className="grid grid-cols-2 gap-1.5 text-[11px]">
                     <button
                       type="button"
                       onClick={() => handleQuickAdminLogin("tofficer1@gmail.com", "123456")}
@@ -194,19 +194,11 @@ export function LoginModal({ isOpen, onClose }) {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleQuickAdminLogin("tofficer4@gmail.com", "123456")}
-                      className="p-1.5 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition text-center truncate"
-                      title="tofficer4@gmail.com (Procurement Officer)"
-                    >
-                      4. Procurement
-                    </button>
-                    <button
-                      type="button"
                       onClick={() => handleQuickAdminLogin("tofficer5@gmail.com", "123456")}
-                      className="p-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-medium rounded-lg transition text-center truncate col-span-2 sm:col-span-1"
+                      className="p-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-medium rounded-lg transition text-center truncate"
                       title="tofficer5@gmail.com (Payment Officer)"
                     >
-                      5. Payment Officer
+                      4. Payment Officer
                     </button>
                   </div>
                 </div>
@@ -257,7 +249,6 @@ export function LoginModal({ isOpen, onClose }) {
                         <option value="Arrival & Token Officer">Arrival & Token Officer</option>
                         <option value="Weighing Officer">Weighing Officer</option>
                         <option value="Quality Check Officer">Quality Check Officer</option>
-                        <option value="Procurement & Price Officer">Procurement & Price Officer</option>
                         <option value="Payment Officer">Payment Officer</option>
                       </select>
                     </div>
@@ -271,7 +262,7 @@ export function LoginModal({ isOpen, onClose }) {
                         onChange={(e) => setRole(e.target.value)}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white"
                       >
-                        <option value="officer">Procurement Officer</option>
+                        <option value="officer">Mandi Officer</option>
                         <option value="admin">Mandi Admin</option>
                       </select>
                     </div>
@@ -341,7 +332,7 @@ export function LoginModal({ isOpen, onClose }) {
                 </span>
               ) : (
                 <span>
-                  Need a Procurement Officer account?{" "}
+                  Need a Mandi Officer account?{" "}
                   <button
                     onClick={() => {
                       setIsRegisterMode(true);

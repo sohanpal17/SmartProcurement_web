@@ -8,8 +8,6 @@ export const getStageOfficerRole = (stageKey) => {
       return ROLES.WEIGHING;
     case "quality":
       return ROLES.QUALITY;
-    case "procurement":
-      return ROLES.PROCUREMENT;
     case "payment":
       return ROLES.PAYMENT;
     default:
