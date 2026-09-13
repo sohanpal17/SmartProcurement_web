@@ -88,7 +88,7 @@ export function LoginModal({ isOpen, onClose }) {
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-black tracking-tight text-white">SmartProcure Admin Portal</h2>
-              <p className="text-xs text-blue-200 font-medium">Agricultural Produce Market Committee (APMC) — Navi Mumbai</p>
+              <p className="text-xs text-blue-200 font-medium">Department of Agricultural Marketing — Government Procurement Portal</p>
             </div>
           </div>
           {onClose && authUser && (
@@ -107,47 +107,46 @@ export function LoginModal({ isOpen, onClose }) {
               Access restricted to registered APMC Centre officials only.
             </p>
 
-            {/* Evaluator Quick Access Buttons */}
+            {/* Quick Access Roles */}
             <div className="bg-blue-50/70 p-4 rounded-xl border border-blue-200 mb-5 space-y-3">
-              <span className="text-[10px] font-black uppercase text-[#0F2B5C] block">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#0F2B5C] block">
                 ⚡ QUICK ACCESS — EVALUATOR DEMO ROLES
               </span>
-
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
                 <button
                   type="button"
                   onClick={() => handleQuickDemoRole(ROLES.ADMIN)}
-                  className="p-2 bg-white hover:bg-amber-50 text-[#0F2B5C] font-extrabold rounded-lg border border-blue-300 shadow-2xs text-left cursor-pointer"
+                  className="p-2.5 bg-white hover:bg-amber-50 text-[#0F2B5C] font-extrabold rounded-xl border border-blue-200 shadow-2xs text-left cursor-pointer transition flex items-center gap-1.5"
                 >
-                  👑 Centre Admin
+                  <span>👑</span> <span>Centre Admin</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleQuickDemoRole(ROLES.CHECKIN)}
-                  className="p-2 bg-white hover:bg-[#15803D]/10 text-emerald-800 font-extrabold rounded-lg border border-emerald-300 shadow-2xs text-left cursor-pointer"
+                  className="p-2.5 bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold rounded-xl border border-emerald-200 shadow-2xs text-left cursor-pointer transition flex items-center gap-1.5"
                 >
-                  📌 Check-in Staff
+                  <span>📌</span> <span>Check-in Staff</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleQuickDemoRole(ROLES.WEIGHING)}
-                  className="p-2 bg-white hover:bg-[#15803D]/10 text-emerald-800 font-extrabold rounded-lg border border-emerald-300 shadow-2xs text-left cursor-pointer"
+                  className="p-2.5 bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold rounded-xl border border-emerald-200 shadow-2xs text-left cursor-pointer transition flex items-center gap-1.5"
                 >
-                  ⚖️ Weighing Staff
+                  <span>⚖️</span> <span>Weighing Staff</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleQuickDemoRole(ROLES.QUALITY)}
-                  className="p-2 bg-white hover:bg-[#15803D]/10 text-emerald-800 font-extrabold rounded-lg border border-emerald-300 shadow-2xs text-left cursor-pointer"
+                  className="p-2.5 bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold rounded-xl border border-emerald-200 shadow-2xs text-left cursor-pointer transition flex items-center gap-1.5"
                 >
-                  🔬 Quality Staff
+                  <span>🔬</span> <span>Quality Staff</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleQuickDemoRole(ROLES.PAYMENT)}
-                  className="p-2 bg-white hover:bg-[#15803D]/10 text-emerald-800 font-extrabold rounded-lg border border-emerald-300 shadow-2xs text-left cursor-pointer"
+                  className="p-2.5 bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold rounded-xl border border-emerald-200 shadow-2xs text-left cursor-pointer transition flex items-center gap-1.5"
                 >
-                  💳 Payment Staff
+                  <span>💳</span> <span>Payment Staff</span>
                 </button>
               </div>
             </div>

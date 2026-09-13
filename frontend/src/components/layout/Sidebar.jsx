@@ -35,41 +35,31 @@ export const Sidebar = ({ currentTab, setCurrentTab }) => {
   if (currentDemoRole === ROLES.ADMIN) {
     navItems = [
       { id: "dashboard", label: "Admin Dashboard", icon: LayoutDashboard },
-      { id: "centres", label: "Centre Management & Search", icon: Building2 },
-      { id: "batch-capacity", label: "Batch & Capacity Config", icon: Layers },
-      { id: "officer-requests", label: "Officer Approvals", icon: UserCheck, badge: pendingOfficersCount },
       { id: "queue-monitor", label: "Operational Queue", icon: Ticket },
-      { id: "procurement-monitor", label: "Procurement Pipeline", icon: Workflow },
-      { id: "flags", label: "Flag Monitor", icon: AlertTriangle, badge: activeFlagsCount },
-      { id: "farmers", label: "Farmers & Tokens", icon: Users },
+      { id: "batch-capacity", label: "Batch & Capacity Config", icon: Layers },
       { id: "history", label: "Audit Logs & History", icon: History },
       { id: "settings", label: "Centre Settings", icon: Settings },
-
     ];
   } else if (currentDemoRole === ROLES.CHECKIN) {
     navItems = [
       { id: "dashboard", label: "Check-in Workstation", icon: LayoutDashboard },
       { id: "queue-monitor", label: "Token Entry Queue", icon: Ticket },
       { id: "late-farmers", label: "Late Farmers", icon: Clock, badge: lateFarmersCount },
-      { id: "farmers", label: "Search Farmers", icon: Users },
       { id: "history", label: "Check-in Logs", icon: History },
     ];
   } else if (currentDemoRole === ROLES.WEIGHING) {
     navItems = [
       { id: "dashboard", label: "Weighing Workstation", icon: Scale },
       { id: "queue-monitor", label: "Weighbridge Queue", icon: Ticket },
-      { id: "flags", label: "Flagged Issues", icon: ShieldAlert, badge: activeFlagsCount },
       { id: "history", label: "Weighing Logs", icon: History },
     ];
   } else if (currentDemoRole === ROLES.QUALITY) {
     navItems = [
       { id: "dashboard", label: "Quality Workstation", icon: Microscope },
       { id: "queue-monitor", label: "Inspection Queue", icon: Ticket },
-      { id: "flags", label: "Flagged Issues", icon: ShieldAlert, badge: activeFlagsCount },
       { id: "history", label: "Quality Logs", icon: History },
     ];
   } else if (currentDemoRole === ROLES.PAYMENT) {
-
     navItems = [
       { id: "dashboard", label: "Payment Workstation", icon: CreditCard },
       { id: "queue-monitor", label: "Payment Payout Queue", icon: Ticket },

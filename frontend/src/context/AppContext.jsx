@@ -80,13 +80,16 @@ export const AppProvider = ({ children }) => {
     }
 
     // Fallback Instant Local Authentication for seamless sign-in
-    const nameFromEmail = email ? email.split("@")[0].replace(/[^a-zA-Z]/g, " ") : "Centre Official";
-    const formattedName = nameFromEmail.charAt(0).toUpperCase() + nameFromEmail.slice(1);
+    const rawName = email ? email.split("@")[0].replace(/[^a-zA-Z]/g, " ").trim() : "Centre Official";
+    const formattedName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+    const finalName = (rawName.toLowerCase().includes("admin") || currentDemoRole === ROLES.ADMIN)
+      ? "Rajeshwar Patil"
+      : (formattedName || "Centre Official");
 
     const fallbackUser = {
       id: `user-${Date.now()}`,
-      fullName: formattedName || "Centre Official",
-      email: email || "official@apmc.maha.gov.in",
+      fullName: finalName,
+      email: email || "official@gov.in",
       role: currentDemoRole || ROLES.ADMIN,
       mandiId: "turbhe",
     };

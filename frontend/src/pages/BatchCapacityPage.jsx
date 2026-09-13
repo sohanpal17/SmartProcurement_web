@@ -14,9 +14,8 @@ import {
 import { getCapacityStatusBadge } from "../utils/queueUtils";
 
 export const BatchCapacityPage = () => {
-  const { slotConfig, updateEveningSlotConfig, farmers, centres, selectedCentreId, setSelectedCentreId } = useApp();
+  const { slotConfig, farmers, centres, selectedCentreId } = useApp();
   const [selectedSlot, setSelectedSlot] = useState("Morning");
-  const [editingCapacity, setEditingCapacity] = useState({});
 
   const currentCentre = centres.find((c) => c.id === selectedCentreId) || centres[0];
   const activeSlotObj = slotConfig[selectedSlot];
@@ -25,7 +24,6 @@ export const BatchCapacityPage = () => {
   const totalBooked = farmers.filter((f) => f.status !== "CANCELLED").length;
   const maxDailyCap = currentCentre?.dailyCapacity || 100;
   const utilizationPercentage = Math.min(100, Math.round((totalBooked / maxDailyCap) * 100));
-  const statusBadge = getCapacityStatusBadge(totalBooked, maxDailyCap);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -36,32 +34,16 @@ export const BatchCapacityPage = () => {
             <div className="w-8 h-8 rounded-lg bg-[#0F2B5C] flex items-center justify-center text-amber-400">
               <Layers className="w-5 h-5" />
             </div>
-            <h1 className="text-xl font-bold text-slate-900">Batch & Capacity Management</h1>
+            <h1 className="text-xl font-bold text-slate-900">Batch & Capacity Config</h1>
           </div>
           <p className="text-xs text-slate-500 mt-1 font-medium">
-            PRD Section 6 — Configure batch timings, slot capacity limits, and operating status. System automatically guards against overbooking.
+            View batch timings, slot capacity limits, and operating status for <strong className="text-slate-800">{currentCentre?.name}</strong>.
           </p>
-        </div>
-
-        {/* Selected Centre Selector */}
-        <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
-          <Building2 className="w-4 h-4 text-[#0F2B5C] ml-2" />
-          <select
-            value={selectedCentreId}
-            onChange={(e) => setSelectedCentreId(e.target.value)}
-            className="bg-white text-xs font-bold text-slate-800 px-3 py-1.5 rounded-lg border border-slate-300 focus:outline-none"
-          >
-            {centres.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name} ({c.district})
-              </option>
-            ))}
-          </select>
         </div>
       </div>
 
       {/* Real-time Capacity Utilization Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-[#0F2B5C]">
             <Building2 className="w-6 h-6" />
@@ -99,25 +81,6 @@ export const BatchCapacityPage = () => {
             </div>
           </div>
         </div>
-
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div
-            className={`w-12 h-12 rounded-xl flex items-center justify-center font-black ${
-              statusBadge.status === "Full"
-                ? "bg-rose-100 text-rose-700 border border-rose-300"
-                : statusBadge.status === "Limited"
-                ? "bg-amber-100 text-amber-700 border border-amber-300"
-                : "bg-emerald-100 text-emerald-700 border border-emerald-300"
-            }`}
-          >
-            <ShieldCheck className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-[10px] uppercase font-bold text-slate-400">System Batch Status</span>
-            <div className="text-lg font-black text-slate-900">{statusBadge.label}</div>
-            <span className="text-[10px] font-bold text-slate-500">Overbooking Guard Active</span>
-          </div>
-        </div>
       </div>
 
       {/* Slot & Batch Configuration Grid */}
@@ -142,7 +105,7 @@ export const BatchCapacityPage = () => {
           })}
         </div>
 
-        {/* Batches Table & Controls */}
+        {/* Batches Table */}
         <div className="p-6 space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
@@ -150,7 +113,7 @@ export const BatchCapacityPage = () => {
                 {activeSlotObj.name} Batches & Capacity Limits
               </h3>
               <p className="text-xs text-slate-500">
-                Official operating window: <strong className="text-slate-800">{activeSlotObj.mainTime}</strong> • Buffer window: {activeSlotObj.bufferTime}
+                Official operating window: <strong className="text-slate-800">{activeSlotObj.mainTime}</strong>
               </p>
             </div>
             <span className="px-3 py-1 bg-emerald-50 text-emerald-800 text-xs font-bold rounded-lg border border-emerald-200">
@@ -159,7 +122,7 @@ export const BatchCapacityPage = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {activeSlotObj.batches.map((batch, idx) => {
+            {activeSlotObj.batches.map((batch) => {
               const bookedCount = farmers.filter(
                 (f) => f.slot === selectedSlot && f.batch === batch.name && f.status !== "CANCELLED"
               ).length;
@@ -214,28 +177,6 @@ export const BatchCapacityPage = () => {
                 </div>
               );
             })}
-
-            {/* Buffer Batch Card */}
-            {activeSlotObj.buffer && (
-              <div className="p-4 rounded-xl border border-amber-300 bg-amber-50/40">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-extrabold text-amber-900 bg-amber-100 px-2.5 py-1 rounded-md border border-amber-300">
-                    🛡️ {activeSlotObj.buffer.name}
-                  </span>
-                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-600 text-white">
-                    BUFFER WINDOW
-                  </span>
-                </div>
-
-                <div className="text-xs text-amber-900 font-medium mb-3">
-                  ⏰ Buffer Window: <strong>{activeSlotObj.buffer.time}</strong>
-                </div>
-
-                <p className="text-[11px] text-amber-800 font-medium bg-white p-2.5 rounded-lg border border-amber-200">
-                  Buffer period reserved for rescheduled tokens or late arriving farmers. Overbooking is restricted to buffer capacity ({activeSlotObj.buffer.capacity}).
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </div>

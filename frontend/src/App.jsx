@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AppProvider, useApp } from "./context/AppContext";
 import { Header } from "./components/layout/Header";
 import { Sidebar } from "./components/layout/Sidebar";
@@ -19,6 +19,7 @@ import { FlagTable } from "./components/flags/FlagTable";
 import { RescheduleModal } from "./components/tokens/RescheduleModal";
 import { FlagModal } from "./components/flags/FlagModal";
 import { LoginModal } from "./components/auth/LoginModal";
+import { ROLES } from "./data/mockData";
 
 function MainLayout() {
   const { authUser, currentDemoRole, selectedFarmerId, setSelectedFarmerId } = useApp();
@@ -26,6 +27,11 @@ function MainLayout() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [rescheduleFarmer, setRescheduleFarmer] = useState(null);
   const [flagTarget, setFlagTarget] = useState(null); // { farmer, stageKey }
+
+  // Redirect officers directly to their own home page (workstation dashboard) on login or role switch
+  useEffect(() => {
+    setCurrentTab("dashboard");
+  }, [currentDemoRole, authUser]);
 
   // AUTH GUARD: If not logged in, enforce Login Screen first!
   if (!authUser) {
@@ -50,6 +56,18 @@ function MainLayout() {
   };
 
   const renderTabContent = () => {
+    // Non-admin officers redirected to their workstation home page if accessing admin-only sections
+    if (currentDemoRole !== ROLES.ADMIN && (currentTab === "batch-capacity" || currentTab === "settings")) {
+      return (
+        <DashboardPage
+          onNavigateTab={(tab) => setCurrentTab(tab)}
+          onOpenReschedule={handleOpenReschedule}
+          onOpenFlag={handleOpenFlag}
+          onOpenFarmerDetails={handleOpenFarmerDetails}
+        />
+      );
+    }
+
     switch (currentTab) {
       case "dashboard":
         return (
@@ -60,12 +78,8 @@ function MainLayout() {
             onOpenFarmerDetails={handleOpenFarmerDetails}
           />
         );
-      case "centres":
-        return <CentreManagementPage />;
       case "batch-capacity":
         return <BatchCapacityPage />;
-      case "officer-requests":
-        return <OfficerTable />;
       case "queue-monitor":
       case "late-farmers":
         return (
@@ -75,12 +89,6 @@ function MainLayout() {
             onOpenFarmerDetails={handleOpenFarmerDetails}
           />
         );
-      case "procurement-monitor":
-        return <ProcurementMonitorPage onOpenFarmerDetails={handleOpenFarmerDetails} />;
-      case "flags":
-        return <FlagTable onOpenFarmerDetails={handleOpenFarmerDetails} />;
-      case "farmers":
-        return <FarmersPage onOpenFarmerDetails={handleOpenFarmerDetails} />;
       case "history":
         return <HistoryPage onOpenFarmerDetails={handleOpenFarmerDetails} />;
       case "settings":

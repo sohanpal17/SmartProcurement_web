@@ -17,7 +17,7 @@ export const DashboardPage = ({ onNavigateTab, onOpenReschedule, onOpenFlag, onO
     );
   }
 
-  if (currentDemoRole === ROLES.ARRIVAL) {
+  if (currentDemoRole === ROLES.ARRIVAL || currentDemoRole === ROLES.CHECKIN || currentDemoRole === "Check-in Staff") {
     return (
       <ArrivalDashboard
         onOpenReschedule={onOpenReschedule}

@@ -5,15 +5,38 @@ import { filterTokensByTab } from "../utils/queueUtils";
 import { Search, Ticket } from "lucide-react";
 
 export const QueueMonitorPage = ({ onOpenReschedule, onOpenFlag, onOpenFarmerDetails }) => {
-  const { farmers, centres, selectedCentreId, setSelectedCentreId } = useApp();
+  const { farmers } = useApp();
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState("Today");
   const [selectedBatch, setSelectedBatch] = useState("All");
 
-  const currentCentre = centres.find((c) => c.id === selectedCentreId) || centres[0];
+  // Stage line counts
+  const arrivalLineCount = farmers.filter((f) => f.currentStage === "arrival" && f.status !== "COMPLETED").length;
+  const weighingLineCount = farmers.filter((f) => f.currentStage === "weighing" && f.status !== "COMPLETED").length;
+  const qualityLineCount = farmers.filter((f) => f.currentStage === "quality" && f.status !== "COMPLETED").length;
+  const paymentLineCount = farmers.filter((f) => f.currentStage === "payment" && f.status !== "COMPLETED").length;
+  const flaggedCount = farmers.filter((f) => f.status === "FLAGGED").length;
+  const completedCount = farmers.filter((f) => f.status === "COMPLETED").length;
 
-  let filtered = filterTokensByTab(farmers, activeTab);
+  let filtered = farmers;
+  if (activeTab === "arrival") {
+    filtered = farmers.filter((f) => f.currentStage === "arrival" && f.status !== "COMPLETED");
+  } else if (activeTab === "weighing") {
+    filtered = farmers.filter((f) => f.currentStage === "weighing" && f.status !== "COMPLETED");
+  } else if (activeTab === "quality") {
+    filtered = farmers.filter((f) => f.currentStage === "quality" && f.status !== "COMPLETED");
+  } else if (activeTab === "payment") {
+    filtered = farmers.filter((f) => f.currentStage === "payment" && f.status !== "COMPLETED");
+  } else if (activeTab === "flagged") {
+    filtered = farmers.filter((f) => f.status === "FLAGGED");
+  } else if (activeTab === "completed") {
+    filtered = farmers.filter((f) => f.status === "COMPLETED");
+  } else if (activeTab === "late") {
+    filtered = farmers.filter((f) => f.status === "LATE");
+  } else {
+    filtered = filterTokensByTab(farmers, activeTab);
+  }
 
   if (selectedBatch !== "All") {
     filtered = filtered.filter((f) => f.batch && f.batch.toLowerCase().includes(selectedBatch.toLowerCase()));
@@ -34,9 +57,9 @@ export const QueueMonitorPage = ({ onOpenReschedule, onOpenFlag, onOpenFarmerDet
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-extrabold text-slate-900">Centre Live Queue Management</h2>
+          <h2 className="text-xl font-extrabold text-slate-900">Operational Live Queue Management</h2>
           <p className="text-xs text-slate-500 mt-0.5 font-medium">
-            PRD Section 7 — Operational queue telemetry filtered by Centre → Date → Batch.
+            Live operational queue telemetry by stage lines.
           </p>
         </div>
 
@@ -53,27 +76,50 @@ export const QueueMonitorPage = ({ onOpenReschedule, onOpenFlag, onOpenFarmerDet
         </div>
       </div>
 
-      {/* PRD Section 7 Filter Control: Centre → Date → Batch */}
+      {/* Stage Lines Summary Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div
+          onClick={() => setActiveTab("arrival")}
+          className="bg-blue-50 border border-blue-200 p-4 rounded-xl cursor-pointer hover:shadow-sm transition-all"
+        >
+          <span className="text-xs font-bold text-blue-900 block uppercase">Arrival Gate Line</span>
+          <span className="text-2xl font-black text-blue-950 block mt-1 font-mono">{arrivalLineCount}</span>
+          <span className="text-[11px] text-blue-700 font-medium">Farmers Arrived</span>
+        </div>
+        <div
+          onClick={() => setActiveTab("weighing")}
+          className="bg-indigo-50 border border-indigo-200 p-4 rounded-xl cursor-pointer hover:shadow-sm transition-all"
+        >
+          <span className="text-xs font-bold text-indigo-900 block uppercase">Weighing Line</span>
+          <span className="text-2xl font-black text-indigo-950 block mt-1 font-mono">{weighingLineCount}</span>
+          <span className="text-[11px] text-indigo-700 font-medium">Awaiting Weighbridge</span>
+        </div>
+        <div
+          onClick={() => setActiveTab("quality")}
+          className="bg-amber-50 border border-amber-200 p-4 rounded-xl cursor-pointer hover:shadow-sm transition-all"
+        >
+          <span className="text-xs font-bold text-amber-900 block uppercase">Quality Check Line</span>
+          <span className="text-2xl font-black text-amber-950 block mt-1 font-mono">{qualityLineCount}</span>
+          <span className="text-[11px] text-amber-700 font-medium">Awaiting Inspection</span>
+        </div>
+        <div
+          onClick={() => setActiveTab("payment")}
+          className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl cursor-pointer hover:shadow-sm transition-all"
+        >
+          <span className="text-xs font-bold text-emerald-900 block uppercase">Payment Line</span>
+          <span className="text-2xl font-black text-emerald-950 block mt-1 font-mono">{paymentLineCount}</span>
+          <span className="text-[11px] text-emerald-700 font-medium">Awaiting Payout</span>
+        </div>
+      </div>
+
+      {/* Date & Batch Filter Control */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
           <Ticket className="w-4 h-4 text-[#0F2B5C]" />
-          <span>Operational Queue Filter:</span>
+          <span>Queue Filters:</span>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700">
-            <span>🏢 Centre:</span>
-            <select
-              value={selectedCentreId}
-              onChange={(e) => setSelectedCentreId(e.target.value)}
-              className="bg-transparent text-[#0F2B5C] font-extrabold focus:outline-none cursor-pointer"
-            >
-              {centres.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-          </div>
-
           <div className="flex items-center gap-1 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700">
             <span>📅 Date:</span>
             <select
@@ -102,16 +148,16 @@ export const QueueMonitorPage = ({ onOpenReschedule, onOpenFlag, onOpenFarmerDet
         </div>
       </div>
 
-
       {/* Filter Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200">
         {[
           { id: "all", label: "All Tokens", count: farmers.length },
-          { id: "waiting", label: "Waiting Queue", count: farmers.filter((f) => f.status === "BOOKED" || f.status === "ARRIVED").length },
-          { id: "active", label: "Active Processing", count: farmers.filter((f) => ["ARRIVED", "WEIGHING", "QUALITY", "PROCUREMENT", "PAYMENT"].includes(f.status)).length },
-          { id: "late", label: "Late Farmers", count: farmers.filter((f) => f.status === "LATE").length },
-          { id: "flagged", label: "Flagged Issues", count: farmers.filter((f) => f.status === "FLAGGED").length },
-          { id: "completed", label: "Completed", count: farmers.filter((f) => f.status === "COMPLETED").length },
+          { id: "arrival", label: "Arrival Line", count: arrivalLineCount },
+          { id: "weighing", label: "Weighing Line", count: weighingLineCount },
+          { id: "quality", label: "Quality Check Line", count: qualityLineCount },
+          { id: "payment", label: "Payment Line", count: paymentLineCount },
+          { id: "flagged", label: "Flagged Issues", count: flaggedCount },
+          { id: "completed", label: "Completed", count: completedCount },
         ].map((tab) => (
           <button
             key={tab.id}
