@@ -11,6 +11,8 @@ import { ProcurementMonitorPage } from "./pages/ProcurementMonitorPage";
 import { FarmersPage } from "./pages/FarmersPage";
 import { HistoryPage } from "./pages/HistoryPage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { CentreManagementPage } from "./pages/CentreManagementPage";
+import { BatchCapacityPage } from "./pages/BatchCapacityPage";
 
 import { OfficerTable } from "./components/officers/OfficerTable";
 import { FlagTable } from "./components/flags/FlagTable";
@@ -58,6 +60,10 @@ function MainLayout() {
             onOpenFarmerDetails={handleOpenFarmerDetails}
           />
         );
+      case "centres":
+        return <CentreManagementPage />;
+      case "batch-capacity":
+        return <BatchCapacityPage />;
       case "officer-requests":
         return <OfficerTable />;
       case "queue-monitor":
@@ -90,6 +96,7 @@ function MainLayout() {
         );
     }
   };
+
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans text-slate-800 antialiased">

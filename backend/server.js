@@ -311,11 +311,134 @@ app.get("/api/test-tables", async (req, res) => {
 
 
 // ============================================================
+// CENTRE REGISTRATION & SEARCH ENDPOINTS (PRD Sections 3 & 4)
+// ============================================================
+
+let memoryCentres = [
+  {
+    id: "MH-NMB-01",
+    name: "Turbhe APMC Main Procurement Centre",
+    state: "Maharashtra",
+    district: "Thane / Navi Mumbai",
+    location: "Sector 19, Kopar Khairane, Navi Mumbai",
+    latitude: "19.0760",
+    longitude: "73.0077",
+    supportedCommodities: ["Wheat", "Paddy / Rice", "Maize", "Cotton", "Mustard"],
+    batchCapacity: 30,
+    dailyCapacity: 100,
+    operationalStatus: "Active",
+    activeStaffCount: 12,
+  },
+  {
+    id: "MH-NSK-02",
+    name: "Lasalgaon Grain & Pulse Centre",
+    state: "Maharashtra",
+    district: "Nashik",
+    location: "Lasalgaon APMC Market Yard, Niphad",
+    latitude: "20.1478",
+    longitude: "74.2341",
+    supportedCommodities: ["Wheat", "Gram / Pulses", "Soyabean", "Maize"],
+    batchCapacity: 25,
+    dailyCapacity: 80,
+    operationalStatus: "Active",
+    activeStaffCount: 9,
+  },
+  {
+    id: "MH-PNE-03",
+    name: "Gultekdi Grain Procurement Hub",
+    state: "Maharashtra",
+    district: "Pune",
+    location: "Gultekdi Market Yard, Pune",
+    latitude: "18.4984",
+    longitude: "73.8647",
+    supportedCommodities: ["Paddy / Rice", "Wheat", "Soyabean"],
+    batchCapacity: 35,
+    dailyCapacity: 120,
+    operationalStatus: "Active",
+    activeStaffCount: 15,
+  },
+];
+
+// GET /api/centres - Search & Filter Registered Centres (PRD Section 4)
+app.get("/api/centres", (req, res) => {
+  const { district, state, commodity, status, query } = req.query;
+  let results = [...memoryCentres];
+
+  if (district && district !== "All") {
+    results = results.filter((c) => c.district.toLowerCase() === district.toLowerCase());
+  }
+
+  if (state && state !== "All") {
+    results = results.filter((c) => c.state.toLowerCase() === state.toLowerCase());
+  }
+
+  if (status && status !== "All") {
+    results = results.filter((c) => c.operationalStatus.toLowerCase() === status.toLowerCase());
+  }
+
+  if (commodity && commodity !== "All") {
+    results = results.filter((c) => c.supportedCommodities && c.supportedCommodities.includes(commodity));
+  }
+
+  if (query) {
+    const q = query.toLowerCase();
+    results = results.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.location.toLowerCase().includes(q) ||
+        c.district.toLowerCase().includes(q)
+    );
+  }
+
+  res.json({
+    success: true,
+    count: results.length,
+    centres: results,
+  });
+});
+
+// POST /api/centres/register - Register New Procurement Centre (PRD Section 3)
+app.post("/api/centres/register", (req, res) => {
+  const { name, state, district, location, latitude, longitude, supportedCommodities, batchCapacity, dailyCapacity, operationalStatus } = req.body;
+
+  if (!name || !district || !location) {
+    return res.status(400).json({
+      success: false,
+      error: "Missing required fields: Centre Name, District, and Location are mandatory.",
+    });
+  }
+
+  const newCentre = {
+    id: `MH-${district.substring(0, 3).toUpperCase()}-${String(memoryCentres.length + 1).padStart(2, "0")}`,
+    name,
+    state: state || "Maharashtra",
+    district,
+    location,
+    latitude: latitude || "19.0760",
+    longitude: longitude || "73.0077",
+    supportedCommodities: supportedCommodities || ["Wheat", "Paddy / Rice"],
+    batchCapacity: Number(batchCapacity || 30),
+    dailyCapacity: Number(dailyCapacity || 100),
+    operationalStatus: operationalStatus || "Active",
+    activeStaffCount: 8,
+    createdAt: new Date().toISOString(),
+  };
+
+  memoryCentres.unshift(newCentre);
+
+  res.status(201).json({
+    success: true,
+    message: "Procurement Centre registered successfully",
+    centre: newCentre,
+  });
+});
+
+// ============================================================
 // FARMER DEBUG / LOOKUP
 // ============================================================
 
-
 // GET /api/farmers
+
 //
 // This is useful for testing which farmer IDs actually exist.
 

@@ -63,7 +63,8 @@ export const RegisterOfficerModal = ({ isOpen, onClose }) => {
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1">Assigned Mandi</label>
+          <label className="block text-xs font-bold text-slate-700 mb-1">Assigned Centre</label>
+
           <input
             type="text"
             disabled

@@ -11,9 +11,12 @@ export const PERMISSIONS = {
     "monitor_queue",
     "monitor_procurement",
     "configure_settings",
+    "register_centre",
+    "manage_centres",
+    "manage_capacity",
     "view_history",
   ],
-  [ROLES.ARRIVAL]: [
+  [ROLES.CHECKIN]: [
     "view_tokens",
     "mark_arrival",
     "call_token",
@@ -54,7 +57,7 @@ export const hasPermission = (role, action) => {
 export const getStageOfficerRole = (stageKey) => {
   switch (stageKey) {
     case "arrival":
-      return ROLES.ARRIVAL;
+      return ROLES.CHECKIN;
     case "weighing":
       return ROLES.WEIGHING;
     case "quality":
@@ -65,3 +68,5 @@ export const getStageOfficerRole = (stageKey) => {
       return null;
   }
 };
+
+

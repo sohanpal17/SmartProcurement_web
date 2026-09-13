@@ -1,17 +1,20 @@
 import React, { useState } from "react";
 import { useApp } from "../../context/AppContext";
+import { Landmark, Lock, Mail, Key } from "lucide-react";
+import { ROLES } from "../../data/mockData";
 
 export function LoginModal({ isOpen, onClose }) {
-  const { authUser, loginUser, registerUser, logoutUser, addToast: showToast } = useApp();
+  const { authUser, loginUser, registerUser, logoutUser, setCurrentDemoRole, addToast: showToast } = useApp();
 
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
-  const [role, setRole] = useState("officer"); // 'admin' or 'officer'
-  const [officerRole, setOfficerRole] = useState("Weighing Officer");
+  const [role, setRole] = useState("officer");
+  const [officerRole, setOfficerRole] = useState("Weighing Staff");
   const [mandiId, setMandiId] = useState("turbhe");
+  const [agreedTerms, setAgreedTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -19,6 +22,10 @@ export function LoginModal({ isOpen, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isRegisterMode && !agreedTerms) {
+      alert("Please check the official authorization confirmation box before signing in.");
+      return;
+    }
     setLoading(true);
     setErrorMsg("");
 
@@ -30,13 +37,13 @@ export function LoginModal({ isOpen, onClose }) {
           fullName,
           phone,
           role,
-          officerRole: role === "officer" ? officerRole : "Admin",
+          officerRole: role === "officer" ? officerRole : "Centre Administrator",
           mandiId: role === "officer" || role === "admin" ? mandiId : null,
         });
 
         if (res.success) {
           if (role === "officer") {
-            showToast("Officer registration submitted! Pending Mandi Admin approval.", "info");
+            showToast("Officer registration submitted! Pending Centre Admin approval.", "info");
             setIsRegisterMode(false);
           } else {
             showToast("Registered successfully!", "success");
@@ -61,293 +68,158 @@ export function LoginModal({ isOpen, onClose }) {
     }
   };
 
-  const handleQuickAdminLogin = async (presetEmail, presetPass) => {
-    setEmail(presetEmail);
-    setPassword(presetPass);
-    setLoading(true);
-    setErrorMsg("");
-    const res = await loginUser(presetEmail, presetPass);
-    setLoading(false);
-    if (res.success) {
-      showToast(`Logged in as ${res.user.fullName}`, "success");
-      if (onClose) onClose();
-    } else {
-      setErrorMsg(res.error || "Login failed.");
+  const handleQuickDemoRole = (roleName) => {
+    setCurrentDemoRole(roleName);
+    if (!authUser) {
+      loginUser(`${roleName.toLowerCase().replace(/\s+/g, '')}@apmc.maha.gov.in`, "demo123");
     }
+    showToast(`Signed in & switched workstation to: ${roleName}`, "info");
+    if (onClose) onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 border border-slate-100 relative transition-all">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 mb-3 font-bold text-xl shadow-sm">
-            🌿
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4 overflow-y-auto">
+      <div className="bg-slate-100 rounded-2xl shadow-2xl max-w-xl w-full border border-slate-300 overflow-hidden animate-fade-in my-8">
+        {/* Top Government Title Header */}
+        <div className="bg-[#0F2B5C] text-white p-4 sm:p-5 flex items-center justify-between border-b border-amber-400">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#0F2B5C]">
+              <Landmark className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-black tracking-tight text-white">SmartProcure Admin Portal</h2>
+              <p className="text-xs text-blue-200 font-medium">Agricultural Produce Market Committee (APMC) — Navi Mumbai</p>
+            </div>
           </div>
-          <h2 className="text-2xl font-bold text-slate-800">
-            {authUser ? "Account Profile" : isRegisterMode ? "Create Officer Account" : "SmartProcure Admin Portal"}
-          </h2>
-          <p className="text-sm text-slate-500 mt-1">
-            {authUser
-              ? `Logged in as ${authUser.fullName} (${authUser.role})`
-              : isRegisterMode
-              ? "Register a new Officer account for Mandi Admin approval"
-              : "Sign in with Mandi Admin or Officer credentials"}
-          </p>
+          {onClose && authUser && (
+            <button onClick={onClose} className="text-slate-300 hover:text-white font-bold text-lg cursor-pointer">✕</button>
+          )}
         </div>
 
-        {/* If Already Logged In */}
-        {authUser ? (
-          <div className="space-y-4">
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-              <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Authenticated User</div>
-              <div className="font-bold text-slate-800 text-lg">{authUser.fullName}</div>
-              <div className="text-sm text-slate-600">{authUser.email}</div>
-              <div className="mt-2 flex gap-2">
-                <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-full uppercase">
-                  Role: {authUser.role}
-                </span>
-                {authUser.mandiId && (
-                  <span className="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full uppercase">
-                    Mandi: {authUser.mandiId}
-                  </span>
-                )}
+        {/* Modal Content */}
+        <div className="p-6">
+          <div className="gov-card p-6 border-slate-300">
+            <div className="flex items-center gap-2 mb-4 text-[#0F2B5C]">
+              <Lock className="w-5 h-5" />
+              <h3 className="text-base font-extrabold">Authorised User Sign In</h3>
+            </div>
+            <p className="text-xs text-slate-500 mb-4 font-medium">
+              Access restricted to registered APMC Centre officials only.
+            </p>
+
+            {/* Evaluator Quick Access Buttons */}
+            <div className="bg-blue-50/70 p-4 rounded-xl border border-blue-200 mb-5 space-y-3">
+              <span className="text-[10px] font-black uppercase text-[#0F2B5C] block">
+                ⚡ QUICK ACCESS — EVALUATOR DEMO ROLES
+              </span>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemoRole(ROLES.ADMIN)}
+                  className="p-2 bg-white hover:bg-amber-50 text-[#0F2B5C] font-extrabold rounded-lg border border-blue-300 shadow-2xs text-left cursor-pointer"
+                >
+                  👑 Centre Admin
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemoRole(ROLES.CHECKIN)}
+                  className="p-2 bg-white hover:bg-[#15803D]/10 text-emerald-800 font-extrabold rounded-lg border border-emerald-300 shadow-2xs text-left cursor-pointer"
+                >
+                  📌 Check-in Staff
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemoRole(ROLES.WEIGHING)}
+                  className="p-2 bg-white hover:bg-[#15803D]/10 text-emerald-800 font-extrabold rounded-lg border border-emerald-300 shadow-2xs text-left cursor-pointer"
+                >
+                  ⚖️ Weighing Staff
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemoRole(ROLES.QUALITY)}
+                  className="p-2 bg-white hover:bg-[#15803D]/10 text-emerald-800 font-extrabold rounded-lg border border-emerald-300 shadow-2xs text-left cursor-pointer"
+                >
+                  🔬 Quality Staff
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemoRole(ROLES.PAYMENT)}
+                  className="p-2 bg-white hover:bg-[#15803D]/10 text-emerald-800 font-extrabold rounded-lg border border-emerald-300 shadow-2xs text-left cursor-pointer"
+                >
+                  💳 Payment Staff
+                </button>
               </div>
             </div>
 
-            <button
-              onClick={() => {
-                logoutUser();
-                showToast("Logged out successfully", "info");
-              }}
-              className="w-full py-3 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-xl transition"
-            >
-              Sign Out
-            </button>
-            {onClose && (
-              <button
-                onClick={onClose}
-                className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition"
-              >
-                Close
-              </button>
-            )}
-          </div>
-        ) : (
-          <>
-            {/* Quick Demo Credentials Presets */}
-            {!isRegisterMode && (
-              <div className="mb-6 p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
-                <div>
-                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Quick Mandi Admin Login:</div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleQuickAdminLogin("turbhe@gmail.com", "turbhe123")}
-                      className="px-2 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-lg transition shadow-sm"
-                    >
-                      Turbhe Admin
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickAdminLogin("vashi@gmail.com", "vashi123")}
-                      className="px-2 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition shadow-sm"
-                    >
-                      Vashi Admin
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickAdminLogin("sanpada@gmail.com", "sanpada123")}
-                      className="px-2 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium rounded-lg transition shadow-sm"
-                    >
-                      Sanpada Admin
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Quick Turbhe Officer Logins:</div>
-                  <div className="grid grid-cols-2 gap-1.5 text-[11px]">
-                    <button
-                      type="button"
-                      onClick={() => handleQuickAdminLogin("tofficer1@gmail.com", "123456")}
-                      className="p-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition text-center truncate"
-                      title="tofficer1@gmail.com (Arrival & Token)"
-                    >
-                      1. Arrival Officer
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickAdminLogin("tofficer2@gmail.com", "123456")}
-                      className="p-1.5 bg-[#102A56] hover:bg-[#1b3a70] text-white font-medium rounded-lg transition text-center truncate"
-                      title="tofficer2@gmail.com (Weighing Officer)"
-                    >
-                      2. Weighing Officer
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickAdminLogin("tofficer3@gmail.com", "123456")}
-                      className="p-1.5 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition text-center truncate"
-                      title="tofficer3@gmail.com (Quality Check)"
-                    >
-                      3. Quality Officer
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickAdminLogin("tofficer5@gmail.com", "123456")}
-                      className="p-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-medium rounded-lg transition text-center truncate"
-                      title="tofficer5@gmail.com (Payment Officer)"
-                    >
-                      4. Payment Officer
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {errorMsg && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl font-medium">
+              <div className="p-3 bg-rose-50 text-rose-700 text-xs font-bold rounded-xl border border-rose-200 mb-4">
                 ⚠️ {errorMsg}
               </div>
             )}
 
-            {/* Login / Register Form */}
+            {/* Credential Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
-              {isRegisterMode && (
-                <>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Full Name</label>
-                    <input
-                      type="text"
-                      required
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder="e.g. Ramesh Patil"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Phone Number</label>
-                    <input
-                      type="tel"
-                      required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="e.g. 9876543210"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-                    />
-                  </div>
-
-                  {role === "officer" && (
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Requested Officer Role</label>
-                      <select
-                        value={officerRole}
-                        onChange={(e) => setOfficerRole(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white font-medium text-slate-800"
-                      >
-                        <option value="Arrival & Token Officer">Arrival & Token Officer</option>
-                        <option value="Weighing Officer">Weighing Officer</option>
-                        <option value="Quality Check Officer">Quality Check Officer</option>
-                        <option value="Payment Officer">Payment Officer</option>
-                      </select>
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Account Category</label>
-                      <select
-                        value={role}
-                        onChange={(e) => setRole(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white"
-                      >
-                        <option value="officer">Mandi Officer</option>
-                        <option value="admin">Mandi Admin</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Assigned Mandi</label>
-                      <select
-                        value={mandiId}
-                        onChange={(e) => setMandiId(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white"
-                      >
-                        <option value="turbhe">Turbhe Mandi</option>
-                        <option value="vashi">Vashi Mandi</option>
-                        <option value="sanpada">Sanpada Mandi</option>
-                      </select>
-                    </div>
-                  </div>
-                </>
-              )}
-
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Email Address</label>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@mandiexample.com"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-                />
+                <label className="block text-xs font-bold text-slate-700 mb-1">Official Email Address *</label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <input
+                    type="email"
+                    required
+                    placeholder="user@apmc.maha.gov.in"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 bg-white text-xs font-medium border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2B5C]"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Password</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Password *</label>
+                <div className="relative">
+                  <Key className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <input
+                    type="password"
+                    required
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 bg-white text-xs font-medium border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2B5C]"
+                  />
+                </div>
+              </div>
+
+              {/* Agreement Checkbox */}
+              <div className="flex items-start gap-2 pt-1">
                 <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                  type="checkbox"
+                  id="govConfirm"
+                  checked={agreedTerms}
+                  onChange={(e) => setAgreedTerms(e.target.checked)}
+                  className="mt-0.5 rounded text-[#0F2B5C] focus:ring-[#0F2B5C]"
                 />
+                <label htmlFor="govConfirm" className="text-[11px] text-slate-600 font-medium">
+                  I confirm that I am an authorised official accessing this portal for official government procurement purposes only.
+                </label>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-semibold rounded-xl transition shadow-md shadow-emerald-600/20 text-sm"
+                className="w-full py-2.5 bg-[#0F2B5C] hover:bg-[#091C3E] text-white font-extrabold text-xs rounded-xl shadow-md transition cursor-pointer flex items-center justify-center gap-2"
               >
-                {loading ? "Processing..." : isRegisterMode ? "Register Officer Account" : "Sign In"}
+                {loading ? "Authenticating..." : "➔ Sign In to Portal"}
               </button>
             </form>
-
-            {/* Toggle Mode */}
-            <div className="mt-5 text-center text-xs text-slate-500">
-              {isRegisterMode ? (
-                <span>
-                  Already have an account?{" "}
-                  <button
-                    onClick={() => {
-                      setIsRegisterMode(false);
-                      setErrorMsg("");
-                    }}
-                    className="text-emerald-600 font-bold hover:underline"
-                  >
-                    Sign In
-                  </button>
-                </span>
-              ) : (
-                <span>
-                  Need a Mandi Officer account?{" "}
-                  <button
-                    onClick={() => {
-                      setIsRegisterMode(true);
-                      setErrorMsg("");
-                    }}
-                    className="text-emerald-600 font-bold hover:underline"
-                  >
-                    Register Officer
-                  </button>
-                </span>
-              )}
-            </div>
-          </>
-        )}
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+
+
+
+
+

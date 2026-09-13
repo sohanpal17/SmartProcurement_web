@@ -3,11 +3,13 @@ import { ROLES } from "../data/mockData";
 export const getStageOfficerRole = (stageKey) => {
   switch (stageKey) {
     case "arrival":
-      return ROLES.ARRIVAL;
+      return ROLES.CHECKIN;
     case "weighing":
       return ROLES.WEIGHING;
     case "quality":
       return ROLES.QUALITY;
+    case "procurement":
+      return ROLES.PROCUREMENT;
     case "payment":
       return ROLES.PAYMENT;
     default:
@@ -17,13 +19,12 @@ export const getStageOfficerRole = (stageKey) => {
 
 export const STAGE_ORDER = ["arrival", "weighing", "quality", "procurement", "payment"];
 
-
 export const STAGE_LABELS = {
-  arrival: "Arrival Verification",
-  weighing: "Weighing",
+  arrival: "Check-in / Arrival",
+  weighing: "Weighbridge",
   quality: "Quality Check",
-  procurement: "Procurement Status",
-  payment: "Payment Status",
+  procurement: "Procurement Payout",
+  payment: "Payment Confirmation",
 };
 
 export const getNextStageKey = (currentStageKey) => {
@@ -33,6 +34,18 @@ export const getNextStageKey = (currentStageKey) => {
   }
   return null;
 };
+
+export const getCapacityStatusBadge = (occupied, capacity) => {
+  if (!capacity || capacity <= 0) return { status: "Available", color: "emerald", label: "Available" };
+  const percentage = (occupied / capacity) * 100;
+  if (percentage >= 100) {
+    return { status: "Full", color: "rose", label: "Full" };
+  } else if (percentage >= 75) {
+    return { status: "Limited", color: "amber", label: "Limited Availability" };
+  }
+  return { status: "Available", color: "emerald", label: "Available" };
+};
+
 
 // Calculate occupied capacity for a given slot & batch
 export const getBatchCapacityDetails = (slotName, batchName, farmers, slotConfig) => {

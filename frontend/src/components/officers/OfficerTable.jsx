@@ -77,7 +77,8 @@ export const OfficerTable = () => {
                 <th className="px-6 py-3.5">Officer Name</th>
                 <th className="px-6 py-3.5">Age</th>
                 <th className="px-6 py-3.5">Phone Number</th>
-                <th className="px-6 py-3.5">Assigned Mandi</th>
+                <th className="px-6 py-3.5">Assigned Centre</th>
+
                 <th className="px-6 py-3.5">Requested Role</th>
                 <th className="px-6 py-3.5">Request Date</th>
                 <th className="px-6 py-3.5 text-right">Actions / Status</th>

@@ -15,29 +15,29 @@ export const StatCard = ({ title, value, subtitle, icon: Icon, color = "slate", 
   return (
     <div
       onClick={onClick}
-      className={`h-full p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-xs transition-all duration-300 hover:shadow-lg flex flex-col justify-between ${
-        onClick ? "cursor-pointer hover:border-blue-500 hover:-translate-y-1 active:translate-y-0" : ""
+      className={`h-full p-3 sm:p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs transition-all duration-300 hover:shadow-lg flex flex-col justify-between overflow-hidden relative ${
+        onClick ? "cursor-pointer hover:border-blue-500 hover:-translate-y-0.5 active:translate-y-0" : ""
       }`}
     >
-      {/* Top Row: Full Title (No dots/truncation) & Icon */}
-      <div className="flex items-start justify-between gap-2">
-        <span className="text-xs font-bold text-slate-600 uppercase tracking-wider leading-snug whitespace-normal">
+      {/* Top Row: Title & Icon */}
+      <div className="flex items-start justify-between gap-1.5 min-w-0">
+        <span className="text-[10px] xl:text-xs font-extrabold text-slate-600 uppercase tracking-tight leading-tight block break-words min-w-0 flex-1">
           {title}
         </span>
         {Icon && (
-          <div className={`w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 ${currentTheme}`}>
-            <Icon className="w-4.5 h-4.5" />
+          <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl border flex items-center justify-center shrink-0 ${currentTheme}`}>
+            <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </div>
         )}
       </div>
 
-      {/* Middle & Bottom: Metric Number & Subtitle (No dots/truncation) */}
-      <div className="mt-3">
-        <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-mono tracking-tight leading-none">
+      {/* Middle & Bottom: Metric Number & Subtitle */}
+      <div className="mt-2 min-w-0">
+        <div className="text-lg sm:text-xl xl:text-2xl font-black text-slate-900 font-mono tracking-tight leading-none">
           {value}
         </div>
         {subtitle && (
-          <p className="text-xs text-slate-500 font-medium mt-1.5 leading-snug whitespace-normal">
+          <p className="text-[10px] sm:text-xs text-slate-500 font-medium mt-1 leading-tight break-words">
             {subtitle}
           </p>
         )}
@@ -45,3 +45,4 @@ export const StatCard = ({ title, value, subtitle, icon: Icon, color = "slate", 
     </div>
   );
 };
+

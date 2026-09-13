@@ -31,7 +31,8 @@ export const FlagModal = ({ isOpen, onClose, farmer, stageKey }) => {
           <div>
             <p className="font-bold mb-1">Flagging Stage: {STAGE_LABELS[stageKey] || stageKey}</p>
             <p>
-              Flagging this stage will freeze farmer processing and notify Mandi Admin for review.
+              Flagging this stage will freeze farmer processing and notify Centre Admin for review.
+
               Subsequent stages remain locked until cleared.
             </p>
           </div>

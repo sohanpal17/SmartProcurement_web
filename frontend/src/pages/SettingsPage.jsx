@@ -37,17 +37,17 @@ export const SettingsPage = () => {
     <div className="space-y-6 max-w-4xl animate-fade-in">
       <div>
 
-        <h2 className="text-xl font-black text-slate-900">Mandi System & Slot Settings</h2>
+        <h2 className="text-xl font-black text-slate-900">Centre System & Slot Settings</h2>
         <p className="text-xs text-slate-500 mt-1">
-          Department of Agricultural Marketing - Configure Mandi profile and custom Evening slot batch divisions.
+          Department of Agricultural Marketing - Configure Centre profile and custom Evening slot batch divisions.
         </p>
       </div>
 
-      {/* Mandi Profile */}
+      {/* Centre Profile */}
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
         <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
           <Building2 className="w-4 h-4 text-[#102A56]" />
-          <span>Department & Mandi Center Profile</span>
+          <span>Department & Procurement Centre Profile</span>
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
@@ -70,7 +70,7 @@ export const SettingsPage = () => {
             />
           </div>
           <div>
-            <label className="block font-semibold text-slate-600 mb-1">Mandi Name & Registration Code</label>
+            <label className="block font-semibold text-slate-600 mb-1">Centre Name & Registration Code</label>
             <input
               type="text"
               disabled
@@ -78,6 +78,7 @@ export const SettingsPage = () => {
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-800 font-semibold"
             />
           </div>
+
           <div>
             <label className="block font-semibold text-slate-600 mb-1">Director / Admin Contact</label>
             <input

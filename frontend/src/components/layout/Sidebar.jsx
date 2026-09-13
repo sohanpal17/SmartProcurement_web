@@ -11,8 +11,13 @@ import {
   History,
   Settings,
   Clock,
-  CheckCircle2,
+  Building2,
+  Layers,
   ShieldAlert,
+  Scale,
+  Microscope,
+  Landmark,
+  CreditCard,
 } from "lucide-react";
 
 export const Sidebar = ({ currentTab, setCurrentTab }) => {
@@ -30,40 +35,63 @@ export const Sidebar = ({ currentTab, setCurrentTab }) => {
   if (currentDemoRole === ROLES.ADMIN) {
     navItems = [
       { id: "dashboard", label: "Admin Dashboard", icon: LayoutDashboard },
-      { id: "officer-requests", label: "Officer Requests", icon: UserCheck, badge: pendingOfficersCount },
-      { id: "queue-monitor", label: "Queue Monitor", icon: Ticket },
+      { id: "centres", label: "Centre Management & Search", icon: Building2 },
+      { id: "batch-capacity", label: "Batch & Capacity Config", icon: Layers },
+      { id: "officer-requests", label: "Officer Approvals", icon: UserCheck, badge: pendingOfficersCount },
+      { id: "queue-monitor", label: "Operational Queue", icon: Ticket },
       { id: "procurement-monitor", label: "Procurement Pipeline", icon: Workflow },
       { id: "flags", label: "Flag Monitor", icon: AlertTriangle, badge: activeFlagsCount },
       { id: "farmers", label: "Farmers & Tokens", icon: Users },
-      { id: "history", label: "Audit History", icon: History },
-      { id: "settings", label: "Mandi Settings", icon: Settings },
+      { id: "history", label: "Audit Logs & History", icon: History },
+      { id: "settings", label: "Centre Settings", icon: Settings },
+
     ];
-  } else if (currentDemoRole === ROLES.ARRIVAL) {
+  } else if (currentDemoRole === ROLES.CHECKIN) {
     navItems = [
-      { id: "dashboard", label: "Arrival Dashboard", icon: LayoutDashboard },
-      { id: "queue-monitor", label: "Token Queue", icon: Ticket },
+      { id: "dashboard", label: "Check-in Workstation", icon: LayoutDashboard },
+      { id: "queue-monitor", label: "Token Entry Queue", icon: Ticket },
       { id: "late-farmers", label: "Late Farmers", icon: Clock, badge: lateFarmersCount },
       { id: "farmers", label: "Search Farmers", icon: Users },
-      { id: "history", label: "History Log", icon: History },
+      { id: "history", label: "Check-in Logs", icon: History },
+    ];
+  } else if (currentDemoRole === ROLES.WEIGHING) {
+    navItems = [
+      { id: "dashboard", label: "Weighing Workstation", icon: Scale },
+      { id: "queue-monitor", label: "Weighbridge Queue", icon: Ticket },
+      { id: "flags", label: "Flagged Issues", icon: ShieldAlert, badge: activeFlagsCount },
+      { id: "history", label: "Weighing Logs", icon: History },
+    ];
+  } else if (currentDemoRole === ROLES.QUALITY) {
+    navItems = [
+      { id: "dashboard", label: "Quality Workstation", icon: Microscope },
+      { id: "queue-monitor", label: "Inspection Queue", icon: Ticket },
+      { id: "flags", label: "Flagged Issues", icon: ShieldAlert, badge: activeFlagsCount },
+      { id: "history", label: "Quality Logs", icon: History },
+    ];
+  } else if (currentDemoRole === ROLES.PAYMENT) {
+
+    navItems = [
+      { id: "dashboard", label: "Payment Workstation", icon: CreditCard },
+      { id: "queue-monitor", label: "Payment Payout Queue", icon: Ticket },
+      { id: "history", label: "Payment Records", icon: History },
     ];
   } else {
     navItems = [
       { id: "dashboard", label: `${currentDemoRole} Dashboard`, icon: LayoutDashboard },
-      { id: "queue-monitor", label: "Active Processing Queue", icon: Ticket },
-      { id: "flags", label: "Flagged Issues", icon: ShieldAlert, badge: activeFlagsCount },
-      { id: "history", label: "Completed History", icon: History },
+      { id: "queue-monitor", label: "Active Queue", icon: Ticket },
+      { id: "history", label: "Audit History", icon: History },
     ];
   }
 
   return (
-    <aside className="w-full md:w-64 bg-[#102A56] text-slate-200 border-r border-[#1b3a70] flex flex-col shrink-0">
-      {/* Current Context Banner */}
-      <div className="p-4 border-b border-[#1b3a70] bg-[#0a1e40]">
-        <span className="text-[10px] uppercase font-bold text-blue-300 tracking-wider block">
-          Role Workstation
+    <aside className="w-full md:w-64 bg-[#0F2B5C] text-slate-200 border-r border-[#1A3A73] flex flex-col shrink-0">
+      {/* Current Role Workstation Banner */}
+      <div className="p-4 border-b border-[#1A3A73] bg-[#091C3E]">
+        <span className="text-[10px] uppercase font-bold text-amber-300 tracking-wider block">
+          Current Workstation
         </span>
-        <div className="text-sm font-bold text-white mt-0.5 flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <div className="text-sm font-black text-white mt-0.5 flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
           <span>{currentDemoRole}</span>
         </div>
       </div>
@@ -79,19 +107,19 @@ export const Sidebar = ({ currentTab, setCurrentTab }) => {
               onClick={() => setCurrentTab(item.id)}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 isActive
-                  ? "bg-[#2563EB] text-white shadow-md"
-                  : "text-blue-100/80 hover:text-white hover:bg-[#173763]"
+                  ? "bg-[#15803D] text-white shadow-md border border-emerald-400/40"
+                  : "text-blue-100/90 hover:text-white hover:bg-[#162C5B]"
               }`}
             >
               <div className="flex items-center gap-3">
-                <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-blue-300"}`} />
+                <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-amber-300"}`} />
                 <span>{item.label}</span>
               </div>
 
               {item.badge !== undefined && item.badge > 0 && (
                 <span
                   className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                    isActive ? "bg-white text-blue-900" : "bg-rose-500 text-white"
+                    isActive ? "bg-white text-emerald-950" : "bg-rose-600 text-white"
                   }`}
                 >
                   {item.badge}
@@ -103,11 +131,12 @@ export const Sidebar = ({ currentTab, setCurrentTab }) => {
       </nav>
 
       {/* Footer Info */}
-      <div className="p-4 border-t border-[#1b3a70] text-[11px] text-blue-300/80 text-center font-medium">
+      <div className="p-4 border-t border-[#1A3A73] text-[11px] text-blue-200/80 text-center font-medium bg-[#091C3E]">
         Department of Agricultural Marketing
         <br />
-        Government Procurement Portal
+        Government of Maharashtra
       </div>
     </aside>
   );
 };
+

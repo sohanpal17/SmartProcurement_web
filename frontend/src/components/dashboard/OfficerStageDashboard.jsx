@@ -73,7 +73,8 @@ export const OfficerStageDashboard = ({ onOpenFlag, onOpenFarmerDetails }) => {
       {/* Other Active Tokens in Queue */}
       <div className="space-y-4 pt-6 border-t border-slate-200">
         <h3 className="text-sm font-bold text-slate-700">
-          Other Active Mandi Tokens (Cross-Officer Visibility)
+          Other Active Centre Tokens (Cross-Officer Visibility)
+
         </h3>
         <p className="text-xs text-slate-500">
           You can observe full progress across all stages, but action controls are restricted to your assigned stage.

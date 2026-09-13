@@ -16,16 +16,27 @@ import {
 } from "lucide-react";
 
 export const AdminDashboard = ({ onNavigateTab, onOpenFarmerDetails }) => {
-  const { farmers, officers, slotConfig } = useApp();
+  const { farmers, officers, centres, selectedCentreId, setSelectedCentreId, slotConfig } = useApp();
 
-  const totalFarmers = farmers.length;
+
+  const [selectedDate, setSelectedDate] = React.useState("Today");
+  const [selectedBatchFilter, setSelectedBatchFilter] = React.useState("All");
+  const [selectedStatusFilter, setSelectedStatusFilter] = React.useState("All");
+
+  const currentCentre = centres.find((c) => c.id === selectedCentreId) || centres[0];
+  const maxDailyCap = currentCentre?.dailyCapacity || 100;
+
+  // PRD 5 Metrics
+  const todaysBookings = farmers.length;
+  const activeFarmers = farmers.filter((f) => f.status !== "COMPLETED" && f.status !== "CANCELLED").length;
   const waitingCount = farmers.filter((f) => f.status === "BOOKED" || f.status === "ARRIVED").length;
-  const inProgressCount = farmers.filter((f) =>
-    ["WEIGHING", "QUALITY", "PROCUREMENT", "PAYMENT"].includes(f.status)
+  const currentlyProcessing = farmers.filter((f) =>
+    ["WEIGHING", "QUALITY", "PROCUREMENT"].includes(f.status)
   ).length;
-  const completedCount = farmers.filter((f) => f.status === "COMPLETED").length;
-  const lateCount = farmers.filter((f) => f.status === "LATE").length;
-  const flaggedCount = farmers.filter((f) => f.status === "FLAGGED").length;
+  const completedProcurements = farmers.filter((f) => f.status === "COMPLETED" || f.currentStage === "payment").length;
+  const pendingPayments = farmers.filter((f) => f.currentStage === "payment" && f.status !== "COMPLETED").length;
+  const availableSlots = Math.max(0, maxDailyCap - todaysBookings);
+  const centreUtilizationPercentage = Math.min(100, Math.round((todaysBookings / maxDailyCap) * 100));
 
   const pendingOfficerReqs = officers.filter((o) => o.status === "PENDING").length;
 
@@ -43,20 +54,20 @@ export const AdminDashboard = ({ onNavigateTab, onOpenFarmerDetails }) => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs card-hover-effect">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-slate-900">Mandi Operations Command Center</h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-[#102A56] border border-blue-200 flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5 text-blue-600" /> MSP Active
+            <h1 className="text-xl font-bold text-slate-900">Centre Operations Command Dashboard</h1>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> MSP Procurement Active
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1 font-medium">
-            Department of Agricultural Marketing - Real-time queue telemetry, capacity analytics, and staff verification.
+            Department of Agricultural Marketing — Government Procurement Portal (PRD Section 5 Metrics & Telemetry)
           </p>
         </div>
 
         {pendingOfficerReqs > 0 && (
           <button
             onClick={() => onNavigateTab("officer-requests")}
-            className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-98 text-slate-950 font-bold text-xs rounded-xl shadow-md flex items-center gap-2 cursor-pointer transition-all duration-200 animate-pulse-subtle"
+            className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-98 text-slate-950 font-bold text-xs rounded-xl shadow-md flex items-center gap-2 cursor-pointer transition-all duration-200"
           >
             <UserCheck className="w-4 h-4 text-slate-950" />
             <span>Review {pendingOfficerReqs} Pending Requests</span>
@@ -65,57 +76,132 @@ export const AdminDashboard = ({ onNavigateTab, onOpenFarmerDetails }) => {
         )}
       </div>
 
-      {/* Metric Cards Grid - Equal Height & Uniform Icon Placements */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      {/* Dashboard Filter Bar (PRD Section 5 Filters) */}
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
+          <Building2 className="w-4 h-4 text-[#0F2B5C]" />
+          <span>Dashboard Interactive Filters:</span>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Centre Filter */}
+          <select
+            value={selectedCentreId}
+            onChange={(e) => setSelectedCentreId(e.target.value)}
+            className="px-3 py-1.5 bg-slate-50 text-xs font-bold border border-slate-300 rounded-lg focus:outline-none"
+          >
+            {centres.map((c) => (
+              <option key={c.id} value={c.id}>🏢 {c.name}</option>
+            ))}
+          </select>
+
+          {/* Date Filter */}
+          <select
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="px-3 py-1.5 bg-slate-50 text-xs font-bold border border-slate-300 rounded-lg focus:outline-none"
+          >
+            <option value="Today">📅 Today (13 Sep 2026)</option>
+            <option value="Tomorrow">📅 Tomorrow</option>
+            <option value="ThisWeek">📅 This Week</option>
+          </select>
+
+          {/* Batch Filter */}
+          <select
+            value={selectedBatchFilter}
+            onChange={(e) => setSelectedBatchFilter(e.target.value)}
+            className="px-3 py-1.5 bg-slate-50 text-xs font-bold border border-slate-300 rounded-lg focus:outline-none"
+          >
+            <option value="All">🕒 All Batches</option>
+            <option value="Morning">Morning Batch</option>
+            <option value="Afternoon">Afternoon Batch</option>
+            <option value="Evening">Evening Batch</option>
+          </select>
+
+          {/* Status Filter */}
+          <select
+            value={selectedStatusFilter}
+            onChange={(e) => setSelectedStatusFilter(e.target.value)}
+            className="px-3 py-1.5 bg-slate-50 text-xs font-bold border border-slate-300 rounded-lg focus:outline-none"
+          >
+            <option value="All">⚡ All Statuses</option>
+            <option value="BOOKED">Booked</option>
+            <option value="ARRIVED">Arrived</option>
+            <option value="WEIGHING">Weighing</option>
+            <option value="QUALITY">Quality Check</option>
+            <option value="COMPLETED">Completed</option>
+          </select>
+        </div>
+      </div>
+
+      {/* PRD Section 5: 8 Essential Metric Cards Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-2.5 sm:gap-3">
         <StatCard
-          title="Total Tokens"
-          value={totalFarmers}
-          subtitle="Issued today"
+          title="Today's Bookings"
+          value={todaysBookings}
+          subtitle="Issued Slots"
           icon={Ticket}
           color="slate"
           onClick={() => onNavigateTab("farmers")}
         />
         <StatCard
-          title="Waiting Queue"
+          title="Active Farmers"
+          value={activeFarmers}
+          subtitle="On Premises"
+          icon={Building2}
+          color="blue"
+          onClick={() => onNavigateTab("queue-monitor")}
+        />
+        <StatCard
+          title="Farmers Waiting"
           value={waitingCount}
-          subtitle="Gate / Entry Tokens"
+          subtitle="Gate / Check-in"
           icon={Clock}
           color="blue"
           onClick={() => onNavigateTab("queue-monitor")}
         />
         <StatCard
-          title="In Progress"
-          value={inProgressCount}
-          subtitle="Processing Counters"
+          title="Currently Processing"
+          value={currentlyProcessing}
+          subtitle="Weighing & Lab"
           icon={Workflow}
           color="emerald"
           onClick={() => onNavigateTab("procurement-monitor")}
         />
         <StatCard
           title="Completed"
-          value={completedCount}
-          subtitle="Paid & Released"
+          value={completedProcurements}
+          subtitle="Procurements"
           icon={CheckCircle2}
           color="indigo"
           onClick={() => onNavigateTab("history")}
         />
         <StatCard
-          title="Late Farmers"
-          value={lateCount}
-          subtitle="Needs Rescheduling"
+          title="Pending Payments"
+          value={pendingPayments}
+          subtitle="Awaiting Payout"
           icon={Clock}
           color="amber"
           onClick={() => onNavigateTab("queue-monitor")}
         />
         <StatCard
-          title="Active Flags"
-          value={flaggedCount}
-          subtitle="Pending Admin Clearing"
-          icon={AlertTriangle}
-          color="rose"
-          onClick={() => onNavigateTab("flags")}
+          title="Available Slots"
+          value={availableSlots}
+          subtitle="Remaining Cap"
+          icon={Ticket}
+          color="emerald"
+          onClick={() => onNavigateTab("batch-capacity")}
+        />
+        <StatCard
+          title="Centre Utilization"
+          value={`${centreUtilizationPercentage}%`}
+          subtitle="Capacity Used"
+          icon={ShieldCheck}
+          color="indigo"
+          onClick={() => onNavigateTab("batch-capacity")}
         />
       </div>
+
 
       {/* Procurement Pipeline Status Gauge */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs card-hover-effect">
