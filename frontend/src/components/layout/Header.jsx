@@ -12,7 +12,7 @@ import {
   User,
 } from "lucide-react";
 
-export const Header = ({ onOpenLogin }) => {
+export const Header = ({ onOpenLogin, onViewLandingPage }) => {
   const { authUser, logoutUser, mandiInfo, farmers, officers, currentDemoRole, setCurrentDemoRole } = useApp();
   const [timeStr, setTimeStr] = useState("");
   const [textSize, setTextSize] = useState("normal"); // normal, large, xlarge
@@ -62,6 +62,16 @@ export const Header = ({ onOpenLogin }) => {
 
         {/* Right Telemetry & Auth Status */}
         <div className="flex items-center gap-3">
+          {onViewLandingPage && (
+            <button
+              onClick={onViewLandingPage}
+              className="bg-[#162C5B] hover:bg-[#1C3B7A] text-amber-300 px-3.5 py-1.5 rounded-full border border-amber-400/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+            >
+              <Landmark className="w-3.5 h-3.5 text-amber-400" />
+              <span>ANNA SETU Public Home</span>
+            </button>
+          )}
+
           <div className="hidden xl:flex items-center gap-2 text-xs">
             <div className="flex items-center gap-1.5 bg-[#091C3E] px-3 py-1.5 rounded-full border border-emerald-500/40 text-emerald-400 font-bold">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -73,8 +83,6 @@ export const Header = ({ onOpenLogin }) => {
               <span>{timeStr}</span>
             </div>
           </div>
-
-          {/* User badge box removed as requested */}
         </div>
       </div>
 

@@ -21,8 +21,11 @@ import { FlagModal } from "./components/flags/FlagModal";
 import { LoginModal } from "./components/auth/LoginModal";
 import { ROLES } from "./data/mockData";
 
+import { LandingPage } from "./pages/LandingPage";
+
 function MainLayout() {
   const { authUser, currentDemoRole, selectedFarmerId, setSelectedFarmerId } = useApp();
+  const [viewMode, setViewMode] = useState(() => (authUser ? "dashboard" : "landing"));
   const [currentTab, setCurrentTab] = useState("dashboard");
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [rescheduleFarmer, setRescheduleFarmer] = useState(null);
@@ -30,14 +33,29 @@ function MainLayout() {
 
   // Redirect officers directly to their own home page (workstation dashboard) on login or role switch
   useEffect(() => {
-    setCurrentTab("dashboard");
+    if (authUser && viewMode === "landing") {
+      // User logged in, allow them to view landing or dashboard
+    }
   }, [currentDemoRole, authUser]);
 
-  // AUTH GUARD: If not logged in, enforce Login Screen first!
-  if (!authUser) {
+  // PUBLIC LANDING PAGE MODE (Shown by default or when requested)
+  if (viewMode === "landing" || !authUser) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-        <LoginModal isOpen={true} onClose={() => {}} />
+      <div className="min-h-screen bg-[#FAF8F5]">
+        <LandingPage
+          onOpenLogin={() => setIsLoginOpen(true)}
+          onEnterDashboard={() => setViewMode("dashboard")}
+          authUser={authUser}
+        />
+
+        {/* Login Modal Overlay */}
+        {isLoginOpen && (
+          <LoginModal
+            isOpen={isLoginOpen}
+            onClose={() => setIsLoginOpen(false)}
+          />
+        )}
+
         <ToastContainer />
       </div>
     );
@@ -57,7 +75,7 @@ function MainLayout() {
 
   const renderTabContent = () => {
     // Non-admin officers redirected to their workstation home page if accessing admin-only sections
-    if (currentDemoRole !== ROLES.ADMIN && (currentTab === "batch-capacity" || currentTab === "settings")) {
+    if (currentDemoRole !== ROLES.ADMIN && currentTab === "batch-capacity") {
       return (
         <DashboardPage
           onNavigateTab={(tab) => setCurrentTab(tab)}
@@ -109,7 +127,10 @@ function MainLayout() {
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans text-slate-800 antialiased">
       {/* Top Header with Sticky Demo Role Switcher & Auth */}
-      <Header onOpenLogin={() => setIsLoginOpen(true)} />
+      <Header
+        onOpenLogin={() => setIsLoginOpen(true)}
+        onViewLandingPage={() => setViewMode("landing")}
+      />
 
       {/* Body Area with Sidebar + Content */}
       <div className="flex-1 flex flex-col md:flex-row">

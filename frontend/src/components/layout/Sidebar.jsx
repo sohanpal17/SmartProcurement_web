@@ -46,30 +46,35 @@ export const Sidebar = ({ currentTab, setCurrentTab }) => {
       { id: "queue-monitor", label: "Token Entry Queue", icon: Ticket },
       { id: "late-farmers", label: "Late Farmers", icon: Clock, badge: lateFarmersCount },
       { id: "history", label: "Check-in Logs", icon: History },
+      { id: "settings", label: "Settings", icon: Settings },
     ];
   } else if (currentDemoRole === ROLES.WEIGHING) {
     navItems = [
       { id: "dashboard", label: "Weighing Workstation", icon: Scale },
       { id: "queue-monitor", label: "Weighbridge Queue", icon: Ticket },
       { id: "history", label: "Weighing Logs", icon: History },
+      { id: "settings", label: "Settings", icon: Settings },
     ];
   } else if (currentDemoRole === ROLES.QUALITY) {
     navItems = [
       { id: "dashboard", label: "Quality Workstation", icon: Microscope },
       { id: "queue-monitor", label: "Inspection Queue", icon: Ticket },
       { id: "history", label: "Quality Logs", icon: History },
+      { id: "settings", label: "Settings", icon: Settings },
     ];
   } else if (currentDemoRole === ROLES.PAYMENT) {
     navItems = [
       { id: "dashboard", label: "Payment Workstation", icon: CreditCard },
       { id: "queue-monitor", label: "Payment Payout Queue", icon: Ticket },
       { id: "history", label: "Payment Records", icon: History },
+      { id: "settings", label: "Settings", icon: Settings },
     ];
   } else {
     navItems = [
       { id: "dashboard", label: `${currentDemoRole} Dashboard`, icon: LayoutDashboard },
       { id: "queue-monitor", label: "Active Queue", icon: Ticket },
       { id: "history", label: "Audit History", icon: History },
+      { id: "settings", label: "Settings", icon: Settings },
     ];
   }
 

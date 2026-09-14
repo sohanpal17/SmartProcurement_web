@@ -24,6 +24,17 @@
     -webkit-font-smoothing: antialiased;
     line-height: 1.5;
   }
+
+  .font-serif {
+    font-family: 'Playfair Display', Georgia, Cambria, "Times New Roman", Times, serif;
+  }
+
+  .hero-shade {
+    background: 
+      linear-gradient(180deg, rgba(9,19,14,.75) 0%, rgba(9,19,14,.25) 25%, transparent 45%),
+      linear-gradient(90deg, rgba(13,29,20,.68) 0%, rgba(13,29,20,.42) 47%, rgba(13,29,20,.08) 75%),
+      linear-gradient(0deg, rgba(9,19,14,.35), transparent 48%);
+  }
 }
 
 /* Custom tricolor accent bar */

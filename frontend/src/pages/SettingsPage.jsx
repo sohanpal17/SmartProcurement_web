@@ -1,9 +1,9 @@
 import React from "react";
 import { useApp } from "../context/AppContext";
-import { Settings, Building2, Clock, LogOut } from "lucide-react";
+import { Settings, Building2, Clock, LogOut, UserCheck, Shield } from "lucide-react";
 
 export const SettingsPage = () => {
-  const { mandiInfo, logoutUser, addToast } = useApp();
+  const { mandiInfo, authUser, currentDemoRole, logoutUser, addToast } = useApp();
 
   const handleLogout = () => {
     logoutUser();
@@ -13,10 +13,46 @@ export const SettingsPage = () => {
   return (
     <div className="space-y-6 max-w-4xl animate-fade-in">
       <div>
-        <h2 className="text-xl font-black text-slate-900">Centre System Settings</h2>
+        <h2 className="text-xl font-black text-slate-900">Officer System Settings</h2>
         <p className="text-xs text-slate-500 mt-1">
-          Department of Agricultural Marketing - Centre profile and account management.
+          Department of Agricultural Marketing — Account management & workstation settings.
         </p>
+      </div>
+
+      {/* Officer Account Details Card */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+        <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
+          <UserCheck className="w-4 h-4 text-[#102A56]" />
+          <span>Active Officer Profile & Session Info</span>
+        </h3>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+          <div>
+            <label className="block font-semibold text-slate-600 mb-1">Officer Name</label>
+            <input
+              type="text"
+              disabled
+              value={authUser?.fullName || "Centre Official"}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-800 font-bold"
+            />
+          </div>
+          <div>
+            <label className="block font-semibold text-slate-600 mb-1">Email / Officer ID</label>
+            <input
+              type="text"
+              disabled
+              value={authUser?.email || "officer@smartprocure.gov.in"}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-800 font-semibold"
+            />
+          </div>
+          <div>
+            <label className="block font-semibold text-slate-600 mb-1">Active Assigned Role</label>
+            <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 font-bold">
+              <Shield className="w-4 h-4 text-emerald-600" />
+              <span>{currentDemoRole}</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Centre Profile */}

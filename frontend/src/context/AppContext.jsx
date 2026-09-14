@@ -106,6 +106,11 @@ export const AppProvider = ({ children }) => {
     };
   };
 
+  const logoutUser = () => {
+    localStorage.removeItem("smartprocure_token");
+    localStorage.removeItem("smartprocure_user");
+    setAuthUser(null);
+  };
 
   const registerUser = async (userData) => {
     try {
@@ -244,12 +249,6 @@ export const AppProvider = ({ children }) => {
     const interval = setInterval(fetchRealData, 4000);
     return () => clearInterval(interval);
   }, [authUser]);
-
-  const logoutUser = () => {
-    localStorage.removeItem("smartprocure_token");
-    localStorage.removeItem("smartprocure_user");
-    setAuthUser(null);
-  };
 
   // Toast notification helper
   const addToast = (message, type = "success") => {
