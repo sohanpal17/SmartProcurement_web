@@ -53,7 +53,7 @@ export function LoginModal({ isOpen, onClose }) {
           setErrorMsg(res.error || "Registration failed.");
         }
       } else {
-        const res = await loginUser(email, password);
+        const res = await loginUser(email, password, role === "officer" ? officerRole : null);
         if (res.success) {
           showToast(`Welcome back, ${res.user.fullName}!`, "success");
           if (onClose) onClose();
@@ -68,12 +68,11 @@ export function LoginModal({ isOpen, onClose }) {
     }
   };
 
-  const handleQuickDemoRole = (roleName) => {
+  const handleQuickDemoRole = async (roleName) => {
     setCurrentDemoRole(roleName);
-    if (!authUser) {
-      loginUser(`${roleName.toLowerCase().replace(/\s+/g, '')}@apmc.maha.gov.in`, "demo123");
-    }
-    showToast(`Signed in & switched workstation to: ${roleName}`, "info");
+    const emailPrefix = roleName.toLowerCase().replace(/[^a-z]/g, "");
+    await loginUser(`${emailPrefix}@apmc.maha.gov.in`, "demo123", roleName);
+    showToast(`Signed in to workstation: ${roleName}`, "info");
     if (onClose) onClose();
   };
 

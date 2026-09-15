@@ -44,19 +44,27 @@ export const AppProvider = ({ children }) => {
   };
 
 
+  const normalizeRole = (roleStr) => {
+    if (!roleStr) return ROLES.ADMIN;
+    const str = roleStr.toString().toLowerCase();
+    if (str === "admin" || str.includes("administrator")) return ROLES.ADMIN;
+    if (str.includes("check") || str.includes("arrival")) return ROLES.CHECKIN;
+    if (str.includes("weigh")) return ROLES.WEIGHING;
+    if (str.includes("quality")) return ROLES.QUALITY;
+    if (str.includes("pay")) return ROLES.PAYMENT;
+    return roleStr;
+  };
+
   // Auto-sync active workstation role when authUser logs in
   useEffect(() => {
     if (authUser) {
-      if (authUser.role === "admin") {
-        setCurrentDemoRole("Admin");
-      } else if (authUser.role) {
-        setCurrentDemoRole(authUser.role);
-      }
+      const userRole = normalizeRole(authUser.officerRole || authUser.role);
+      setCurrentDemoRole(userRole);
     }
   }, [authUser]);
 
   // AUTH API INTEGRATION WITH BACKEND & DEMO FALLBACK
-  const loginUser = async (email, password) => {
+  const loginUser = async (email, password, explicitRole = null) => {
     try {
       const res = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
@@ -65,39 +73,49 @@ export const AppProvider = ({ children }) => {
       });
       const data = await res.json();
       if (data.success && data.token) {
+        const userRole = normalizeRole(data.user.officerRole || data.user.role || explicitRole);
+        const updatedUser = { ...data.user, role: userRole, officerRole: userRole };
         localStorage.setItem("smartprocure_token", data.token);
-        localStorage.setItem("smartprocure_user", JSON.stringify(data.user));
-        setAuthUser(data.user);
-        if (data.user.role === "admin" || data.user.role === "Centre Administrator") {
-          setCurrentDemoRole(ROLES.ADMIN);
-        } else if (data.user.role) {
-          setCurrentDemoRole(data.user.role);
-        }
-        return data;
+        localStorage.setItem("smartprocure_user", JSON.stringify(updatedUser));
+        setAuthUser(updatedUser);
+        setCurrentDemoRole(userRole);
+        return { ...data, user: updatedUser };
       }
     } catch (e) {
       console.log("Backend API offline - proceeding with local demo authentication");
     }
 
     // Fallback Instant Local Authentication for seamless sign-in
+    let targetRole = explicitRole ? normalizeRole(explicitRole) : null;
+    if (!targetRole) {
+      const lowerEmail = (email || "").toLowerCase();
+      if (lowerEmail.includes("admin")) targetRole = ROLES.ADMIN;
+      else if (lowerEmail.includes("checkin") || lowerEmail.includes("arrival")) targetRole = ROLES.CHECKIN;
+      else if (lowerEmail.includes("weighing") || lowerEmail.includes("weigh")) targetRole = ROLES.WEIGHING;
+      else if (lowerEmail.includes("quality")) targetRole = ROLES.QUALITY;
+      else if (lowerEmail.includes("payment") || lowerEmail.includes("pay")) targetRole = ROLES.PAYMENT;
+      else targetRole = normalizeRole(currentDemoRole);
+    }
+
     const rawName = email ? email.split("@")[0].replace(/[^a-zA-Z]/g, " ").trim() : "Centre Official";
     const formattedName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
-    const finalName = (rawName.toLowerCase().includes("admin") || currentDemoRole === ROLES.ADMIN)
+    const finalName = targetRole === ROLES.ADMIN
       ? "Rajeshwar Patil"
-      : (formattedName || "Centre Official");
+      : `${formattedName || "Official"} (${targetRole})`;
 
     const fallbackUser = {
       id: `user-${Date.now()}`,
       fullName: finalName,
       email: email || "official@gov.in",
-      role: currentDemoRole || ROLES.ADMIN,
+      role: targetRole,
+      officerRole: targetRole,
       mandiId: "turbhe",
     };
-
 
     localStorage.setItem("smartprocure_token", "demo-jwt-token-12345");
     localStorage.setItem("smartprocure_user", JSON.stringify(fallbackUser));
     setAuthUser(fallbackUser);
+    setCurrentDemoRole(targetRole);
 
     return {
       success: true,

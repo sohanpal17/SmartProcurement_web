@@ -33,8 +33,9 @@ function MainLayout() {
 
   // Redirect officers directly to their own home page (workstation dashboard) on login or role switch
   useEffect(() => {
-    if (authUser && viewMode === "landing") {
-      // User logged in, allow them to view landing or dashboard
+    if (authUser) {
+      setViewMode("dashboard");
+      setCurrentTab("dashboard");
     }
   }, [currentDemoRole, authUser]);
 
