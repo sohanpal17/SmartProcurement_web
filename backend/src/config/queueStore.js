@@ -3,9 +3,42 @@ class QueueStore {
   constructor() {
     this.bookings = [
       {
+        id: "booking-1038",
+        token_number: "TBR-1038",
+        farmer_name: "Vikas Shinde",
+        display_farmer_id: "FMR-7128912338",
+        commodity_name: "Soybean",
+        quantity_quintals: 45,
+        mandi_id: "turbhe",
+        time_range: "07:00 AM – 10:00 AM",
+        status: "Confirmed",
+      },
+      {
+        id: "booking-1039",
+        token_number: "TBR-1039",
+        farmer_name: "Namdeo Kadam",
+        display_farmer_id: "FMR-7128912339",
+        commodity_name: "Cotton",
+        quantity_quintals: 38,
+        mandi_id: "turbhe",
+        time_range: "12:00 PM – 03:00 PM",
+        status: "Confirmed",
+      },
+      {
+        id: "booking-1040",
+        token_number: "TBR-1040",
+        farmer_name: "Baburao More",
+        display_farmer_id: "FMR-7128912340",
+        commodity_name: "Paddy",
+        quantity_quintals: 52,
+        mandi_id: "turbhe",
+        time_range: "07:00 AM – 10:00 AM",
+        status: "Confirmed",
+      },
+      {
         id: "booking-1041",
         token_number: "TBR-1041",
-        farmer_name: "Suresh Jagdale",
+        farmer_name: "Digambar Deshmukh",
         display_farmer_id: "FMR-7128912345",
         commodity_name: "Soybean",
         quantity_quintals: 50,
@@ -48,17 +81,26 @@ class QueueStore {
       },
     ];
 
-    this.queueRecords = this.bookings.map((b) => ({
-      id: `q-${b.id}`,
-      booking_id: b.id,
-      token_number: b.token_number,
-      mandi_id: b.mandi_id,
-      current_stage: 1,
-      people_ahead: 2,
-      estimated_wait_mins: 30,
-      updated_at: new Date().toISOString(),
-      bookings: b,
-    }));
+    const completedIds = ["booking-1038", "booking-1039", "booking-1040"];
+    this.queueRecords = this.bookings.map((b) => {
+      const isCompleted = completedIds.includes(b.id);
+      return {
+        id: `q-${b.id}`,
+        booking_id: b.id,
+        token_number: b.token_number,
+        mandi_id: b.mandi_id,
+        current_stage: isCompleted ? 5 : 1,
+        people_ahead: isCompleted ? 0 : 2,
+        estimated_wait_mins: isCompleted ? 0 : 30,
+        updated_at: new Date().toISOString(),
+        bookings: b,
+      };
+    });
+
+    // Explicitly purge token 1045 if added previously
+    this.removeBookingOrToken("TBR-1045");
+    this.removeBookingOrToken("1045");
+    this.removeBookingOrToken("BK-1045");
   }
 
   addBookingAndToken(booking, queueRecord) {

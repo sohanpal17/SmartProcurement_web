@@ -175,36 +175,61 @@ export const filterTokensByTab = (farmers, tab) => {
 
 export const getDisplaySlot = (farmer) => {
   if (!farmer) return "Morning";
-  const slot = farmer.slot;
-  const batchStr = (farmer.batch || "").toLowerCase();
+  
+  // 1. Explicit slot property check
+  if (farmer.slot && ["Morning", "Afternoon", "Evening"].includes(farmer.slot)) {
+    return farmer.slot;
+  }
 
+  // 2. Batch ID check
+  const batchId = (farmer.batchId || farmer.batch_id || "").toLowerCase();
+  if (batchId.includes("morning")) return "Morning";
+  if (batchId.includes("afternoon")) return "Afternoon";
+  if (batchId.includes("evening")) return "Evening";
+
+  // 3. Time range string check
+  const timeStr = (farmer.batch || farmer.time_range || "").toLowerCase();
+  if (timeStr.includes("morning")) return "Morning";
+  if (timeStr.includes("afternoon")) return "Afternoon";
+  if (timeStr.includes("evening")) return "Evening";
+
+  // Extract START time before hyphen to avoid matching end times like "12:00 PM" in morning batch "09:00 AM – 12:00 PM"
+  const startTime = timeStr.split("–")[0].split("-")[0].trim();
   if (
-    batchStr.includes("afternoon") ||
-    batchStr.includes("12:") ||
-    batchStr.includes("01:") ||
-    batchStr.includes("1:") ||
-    batchStr.includes("02:") ||
-    batchStr.includes("2:") ||
-    batchStr.includes("03:") ||
-    batchStr.includes("3:")
+    startTime.includes("am") ||
+    startTime.startsWith("07:") ||
+    startTime.startsWith("08:") ||
+    startTime.startsWith("09:") ||
+    startTime.startsWith("10:") ||
+    startTime.startsWith("11:")
+  ) {
+    return "Morning";
+  }
+  if (
+    startTime.includes("12:") ||
+    startTime.startsWith("01:") ||
+    startTime.startsWith("1:") ||
+    startTime.startsWith("02:") ||
+    startTime.startsWith("2:") ||
+    startTime.startsWith("03:") ||
+    startTime.startsWith("3:") ||
+    startTime.startsWith("04:") ||
+    startTime.startsWith("4:")
   ) {
     return "Afternoon";
   }
   if (
-    batchStr.includes("evening") ||
-    batchStr.includes("05:") ||
-    batchStr.includes("5:") ||
-    batchStr.includes("06:") ||
-    batchStr.includes("6:") ||
-    batchStr.includes("07:00 pm") ||
-    batchStr.includes("7:00 pm") ||
-    batchStr.includes("08:") ||
-    batchStr.includes("8:")
+    startTime.startsWith("05:") ||
+    startTime.startsWith("5:") ||
+    startTime.startsWith("06:") ||
+    startTime.startsWith("6:") ||
+    startTime.startsWith("07:") ||
+    startTime.startsWith("7:") ||
+    startTime.startsWith("08:") ||
+    startTime.startsWith("8:")
   ) {
     return "Evening";
   }
-  if (slot && ["Morning", "Afternoon", "Evening"].includes(slot)) {
-    return slot;
-  }
+
   return "Morning";
 };

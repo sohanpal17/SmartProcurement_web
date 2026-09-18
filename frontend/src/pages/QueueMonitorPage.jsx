@@ -54,23 +54,44 @@ export const QueueMonitorPage = ({ onOpenReschedule, onOpenFlag, onOpenFarmerDet
 
   const getFormattedDate = (farmer) => {
     const dStr = farmer.date || farmer.created_at || (farmer.history && farmer.history[0]?.timestamp);
-    const now = new Date();
-    const day = String(now.getDate()).padStart(2, "0");
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const year = now.getFullYear();
-    const todayFormatted = `${day}/${month}/${year}`;
-
-    if (!dStr) return todayFormatted;
-    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dStr)) return dStr;
-    const parsed = new Date(dStr);
-    if (!isNaN(parsed.getTime())) {
-      const pDay = String(parsed.getDate()).padStart(2, "0");
-      const pMonth = String(parsed.getMonth() + 1).padStart(2, "0");
-      const pYear = parsed.getFullYear();
-      return `${pDay}/${pMonth}/${pYear}`;
+    if (!dStr) {
+      const now = new Date();
+      return `${String(now.getDate()).padStart(2, "0")}/${String(now.getMonth() + 1).padStart(2, "0")}/${now.getFullYear()}`;
     }
-    return todayFormatted;
+
+    const str = String(dStr).trim();
+
+    // Match dd/mm/yyyy if present anywhere in string
+    const matchDDMMYYYY = str.match(/(\d{2}\/\d{2}\/\d{4})/);
+    if (matchDDMMYYYY) {
+      return matchDDMMYYYY[1];
+    }
+
+    // Match yyyy-mm-dd format
+    const matchYYYYMMDD = str.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (matchYYYYMMDD) {
+      return `${matchYYYYMMDD[3]}/${matchYYYYMMDD[2]}/${matchYYYYMMDD[1]}`;
+    }
+
+    // Try parsing as Date
+    const parsed = new Date(str);
+    if (!isNaN(parsed.getTime())) {
+      return `${String(parsed.getDate()).padStart(2, "0")}/${String(parsed.getMonth() + 1).padStart(2, "0")}/${parsed.getFullYear()}`;
+    }
+
+    const now = new Date();
+    return `${String(now.getDate()).padStart(2, "0")}/${String(now.getMonth() + 1).padStart(2, "0")}/${now.getFullYear()}`;
   };
+
+  // Sort tokens so completed farmers appear AT THE LAST in operational queue table
+  const sortedFiltered = [...filtered].sort((a, b) => {
+    const aCompleted = a.status === "COMPLETED" ? 1 : 0;
+    const bCompleted = b.status === "COMPLETED" ? 1 : 0;
+    if (aCompleted !== bCompleted) {
+      return aCompleted - bCompleted;
+    }
+    return 0;
+  });
 
   const getFormattedTime = (farmer) => {
     if (farmer.history && farmer.history.length > 0 && farmer.history[0].timestamp) {
@@ -223,14 +244,14 @@ export const QueueMonitorPage = ({ onOpenReschedule, onOpenFlag, onOpenFarmerDet
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filtered.length === 0 ? (
+              {sortedFiltered.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-10 text-center text-slate-400">
                     No tokens match your search or filter criteria.
                   </td>
                 </tr>
               ) : (
-                filtered.map((farmer) => {
+                sortedFiltered.map((farmer) => {
                   const currentProcessLabel = STAGE_LABELS[farmer.currentStage] || farmer.currentStage;
                   const isFlagged = farmer.status === "FLAGGED";
                   const isCompleted = farmer.status === "COMPLETED";

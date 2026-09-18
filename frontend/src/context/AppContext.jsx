@@ -7,7 +7,7 @@ import {
   INITIAL_FARMERS,
   INITIAL_CENTRES,
 } from "../data/mockData";
-import { getNextStageKey, STAGE_LABELS } from "../utils/queueUtils";
+import { getNextStageKey, STAGE_LABELS, getDisplaySlot } from "../utils/queueUtils";
 
 const AppContext = createContext();
 
@@ -183,7 +183,10 @@ export const AppProvider = ({ children }) => {
         const queueData = await queueRes.json();
         if (queueData.success && Array.isArray(queueData.queueRecords)) {
           setFarmers((prevFarmers) => {
-            return queueData.queueRecords.map((q) => {
+            const serverTokenNumbers = new Set(queueData.queueRecords.map((q) => q.token_number || q.bookings?.token_number).filter(Boolean));
+            const serverIds = new Set(queueData.queueRecords.map((q) => q.id || q.booking_id).filter(Boolean));
+
+            const serverFarmers = queueData.queueRecords.map((q) => {
               const b = q.bookings || {};
               const existing = prevFarmers.find(
                 (f) => f.tokenNumber === q.token_number || f.id === q.id || f.id === q.booking_id
@@ -226,7 +229,7 @@ export const AppProvider = ({ children }) => {
                 measuredWeightQuintals: existing?.measuredWeightQuintals || null,
                 qualityGrade: existing?.qualityGrade || null,
                 procurementRatePerQuintal: existing?.procurementRatePerQuintal || null,
-                slot: existing?.slot || (b.time_range?.toLowerCase().includes("12:") || b.time_range?.toLowerCase().includes("afternoon") ? "Afternoon" : b.time_range?.toLowerCase().includes("05:") || b.time_range?.toLowerCase().includes("evening") ? "Evening" : "Morning"),
+                slot: existing?.slot || getDisplaySlot({ slot: b.slot, batch_id: b.batch_id, batch: b.time_range, time_range: b.time_range }),
                 batch: b.time_range || existing?.batch || "07:00 AM – 10:00 AM",
                 status: statusStr,
                 arrivalStatus: effectiveStage > 1 ? "ARRIVED" : (existing?.arrivalStatus || "BOOKED"),
@@ -243,6 +246,12 @@ export const AppProvider = ({ children }) => {
                 history: existing?.history || [{ timestamp: new Date(q.updated_at).toLocaleTimeString(), event: "Token Synced from Backend", actor: "System" }],
               };
             });
+
+            const unsyncedLocalFarmers = prevFarmers.filter(
+              (f) => !serverTokenNumbers.has(f.tokenNumber) && !serverIds.has(f.id)
+            );
+
+            return [...serverFarmers, ...unsyncedLocalFarmers];
           });
         }
 

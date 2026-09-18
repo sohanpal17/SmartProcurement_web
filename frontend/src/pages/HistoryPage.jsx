@@ -9,37 +9,19 @@ export const HistoryPage = ({ onOpenFarmerDetails }) => {
   // Only COMPLETED tokens should be visible in audit history
   const completedFarmers = farmers.filter((f) => f.status === "COMPLETED");
 
-  const allAuditLog = [];
-  completedFarmers.forEach((f) => {
-    if (f.history && f.history.length > 0) {
-      f.history.forEach((h) => {
-        if (
-          !h.event?.toLowerCase().includes("procurement payout") &&
-          !h.event?.toLowerCase().includes("procurement officer") &&
-          !h.actor?.toLowerCase().includes("procurement")
-        ) {
-          allAuditLog.push({
-            ...h,
-            farmerId: f.id,
-            tokenNumber: f.tokenNumber,
-            farmerName: f.farmerName,
-            crop: f.crop || f.commodity,
-            slot: f.slot || "Morning",
-            date: h.timestamp || "Today",
-          });
-        }
-      });
-    } else {
-      allAuditLog.push({
-        farmerId: f.id,
-        tokenNumber: f.tokenNumber,
-        farmerName: f.farmerName,
-        crop: f.crop || f.commodity,
-        slot: f.slot || "Morning",
-        date: "Today",
-        event: "Token Procurement Completed",
-      });
-    }
+  const allAuditLog = completedFarmers.map((f) => {
+    const lastHistory = f.history && f.history.length > 0 ? f.history[f.history.length - 1] : null;
+    const logDate = lastHistory?.timestamp || f.date || f.created_at || "Today";
+
+    return {
+      farmerId: f.id,
+      tokenNumber: f.tokenNumber,
+      farmerName: f.farmerName,
+      crop: f.crop || f.commodity,
+      slot: f.slot || "Morning",
+      date: logDate,
+      event: "Token Procurement Completed",
+    };
   });
 
   const filteredLog = allAuditLog.filter(
@@ -62,6 +44,37 @@ export const HistoryPage = ({ onOpenFarmerDetails }) => {
     const slotB = slotOrder[b.slot] || 99;
     return slotA - slotB;
   });
+
+  const formatDateToDDMMYYYY = (rawDate) => {
+    if (!rawDate) {
+      const today = new Date();
+      return `${String(today.getDate()).padStart(2, "0")}/${String(today.getMonth() + 1).padStart(2, "0")}/${today.getFullYear()}`;
+    }
+
+    const str = String(rawDate).trim();
+
+    // Match dd/mm/yyyy if present anywhere in string
+    const matchDDMMYYYY = str.match(/(\d{2}\/\d{2}\/\d{4})/);
+    if (matchDDMMYYYY) {
+      return matchDDMMYYYY[1];
+    }
+
+    // Match yyyy-mm-dd format
+    const matchYYYYMMDD = str.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (matchYYYYMMDD) {
+      return `${matchYYYYMMDD[3]}/${matchYYYYMMDD[2]}/${matchYYYYMMDD[1]}`;
+    }
+
+    // Try standard JS date parsing
+    const d = new Date(str);
+    if (!isNaN(d.getTime())) {
+      return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+    }
+
+    // Default fallback to today's date in dd/mm/yyyy format
+    const today = new Date();
+    return `${String(today.getDate()).padStart(2, "0")}/${String(today.getMonth() + 1).padStart(2, "0")}/${today.getFullYear()}`;
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -120,7 +133,7 @@ export const HistoryPage = ({ onOpenFarmerDetails }) => {
                       {log.farmerName}
                     </td>
                     <td className="px-6 py-4 text-slate-600 font-medium">
-                      {log.date}
+                      {formatDateToDDMMYYYY(log.date)}
                     </td>
                     <td className="px-6 py-4 text-slate-700 font-semibold">
                       {log.slot}

@@ -9,7 +9,19 @@ function isValidUUID(str) {
     return regex.test(str);
 }
 
-let tokenCounter = 1040;
+function getNextTokenNumber(mandiPrefix = 'TBR') {
+    const existingTokens = queueStore.bookings.map((b) => b.token_number || '');
+    let maxNum = 1044;
+    existingTokens.forEach((t) => {
+        const match = t.match(/(\d+)/);
+        if (match) {
+            const num = parseInt(match[1], 10);
+            if (num > maxNum) maxNum = num;
+        }
+    });
+    const nextNum = maxNum + 1;
+    return `${(mandiPrefix || 'TBR').toUpperCase()}-${nextNum}`;
+}
 
 // 1. CREATE BOOKING & GENERATE TOKEN
 exports.createBooking = async (req, res) => {
@@ -36,9 +48,8 @@ exports.createBooking = async (req, res) => {
         const qty = parseFloat(quantityQuintals);
         const availId = `${mandiId}_${dateKey}_${batchId}`;
 
-        // Generate Proper Sequential Token Number (e.g. TBR-1041)
-        tokenCounter += 1;
-        const tokenNumber = passedTokenNumber || `${(mandiPrefix || 'TBR').toUpperCase()}-${tokenCounter}`;
+        // Generate Proper Sequential Token Number (e.g. TBR-1045)
+        const tokenNumber = passedTokenNumber || getNextTokenNumber(mandiPrefix);
         const bookingRef = `BK-${Date.now().toString().slice(-6)}`;
         const bookingId = randomUUID();
         const safeFarmerUUID = isValidUUID(farmerId) ? farmerId : '00000000-0000-0000-0000-000000000000';

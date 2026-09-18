@@ -1,5 +1,6 @@
 import React from "react";
 import { useApp } from "../context/AppContext";
+import { getDisplaySlot } from "../utils/queueUtils";
 import {
   Layers,
   Clock,
@@ -9,9 +10,7 @@ import {
 } from "lucide-react";
 
 export const BatchCapacityPage = () => {
-  const { slotConfig, farmers, centres, selectedCentreId } = useApp();
-
-  const currentCentre = centres.find((c) => c.id === selectedCentreId) || centres[0];
+  const { currentCentre, slotConfig, farmers } = useApp();
 
   // Calculate overall centre capacity utilization
   const totalBooked = farmers.filter((f) => f.status !== "CANCELLED").length;
@@ -21,36 +20,7 @@ export const BatchCapacityPage = () => {
   const slotsList = Object.keys(slotConfig); // ["Morning", "Afternoon", "Evening"]
 
   const getFarmerSession = (f) => {
-    const slotStr = (f.slot || "").toLowerCase();
-    const batchStr = (f.batch || "").toLowerCase();
-    if (
-      slotStr.includes("afternoon") ||
-      batchStr.includes("afternoon") ||
-      batchStr.includes("12:") ||
-      batchStr.includes("01:") ||
-      batchStr.includes("1:") ||
-      batchStr.includes("02:") ||
-      batchStr.includes("2:") ||
-      batchStr.includes("03:") ||
-      batchStr.includes("3:")
-    ) {
-      return "Afternoon";
-    }
-    if (
-      slotStr.includes("evening") ||
-      batchStr.includes("evening") ||
-      batchStr.includes("05:") ||
-      batchStr.includes("5:") ||
-      batchStr.includes("06:") ||
-      batchStr.includes("6:") ||
-      batchStr.includes("07:00 pm") ||
-      batchStr.includes("7:00 pm") ||
-      batchStr.includes("08:") ||
-      batchStr.includes("8:")
-    ) {
-      return "Evening";
-    }
-    return "Morning";
+    return getDisplaySlot(f);
   };
 
   return (
