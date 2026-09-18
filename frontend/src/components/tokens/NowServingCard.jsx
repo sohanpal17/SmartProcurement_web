@@ -1,6 +1,7 @@
 import React from "react";
 import { useApp } from "../../context/AppContext";
 import { StatusBadge } from "../common/Badge";
+import { getDisplaySlot } from "../../utils/queueUtils";
 import { Volume2, ArrowRight, Phone, Scale, MapPin, UserCheck, ShieldCheck } from "lucide-react";
 
 export const NowServingCard = ({ onOpenFarmerDetails }) => {
@@ -52,31 +53,28 @@ export const NowServingCard = ({ onOpenFarmerDetails }) => {
                     <MapPin className="w-3.5 h-3.5 text-blue-300" />
                     <span>{currentServingFarmer.location || "Kopar Khairane, Navi Mumbai"}</span>
                     <span>•</span>
-                    <span>{currentServingFarmer.slot} • {currentServingFarmer.batch}</span>
+                    <span>Slot: {getDisplaySlot(currentServingFarmer)}</span>
                   </p>
                 </div>
               </div>
 
-              <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-200">
-                <span className="bg-[#173763] px-3 py-1.5 rounded-lg border border-blue-400/20 flex items-center gap-1.5 font-medium">
-                  <Phone className="w-3.5 h-3.5 text-blue-300" />
-                  <span>{currentServingFarmer.phone}</span>
-                </span>
-
-                <span className="bg-[#173763] px-3 py-1.5 rounded-lg border border-blue-400/20 flex items-center gap-1.5 font-medium">
-                  <Scale className="w-3.5 h-3.5 text-blue-300" />
-                  <span>Expected: {currentServingFarmer.expectedQuantityQuintals} Quintals ({currentServingFarmer.crop})</span>
-                </span>
-
-                {currentServingFarmer.farmerIdNum && (
-                  <span className="bg-[#173763] px-3 py-1.5 rounded-lg border border-blue-400/20 font-mono text-blue-200">
-                    ID: {currentServingFarmer.farmerIdNum}
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-200 w-full">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="bg-[#173763] px-3 py-1.5 rounded-lg border border-blue-400/20 flex items-center gap-1.5 font-medium">
+                    <Scale className="w-3.5 h-3.5 text-blue-300" />
+                    <span>Expected: {currentServingFarmer.expectedQuantityQuintals} Quintals</span>
                   </span>
-                )}
+
+                  {currentServingFarmer.farmerIdNum && (
+                    <span className="bg-[#173763] px-3 py-1.5 rounded-lg border border-blue-400/20 font-mono text-blue-200">
+                      ID: {currentServingFarmer.farmerIdNum}
+                    </span>
+                  )}
+                </div>
 
                 <button
                   onClick={() => onOpenFarmerDetails(currentServingFarmer.id)}
-                  className="text-amber-300 hover:text-amber-200 font-semibold text-xs flex items-center gap-1 ml-auto underline"
+                  className="text-amber-300 hover:text-amber-200 font-semibold text-xs flex items-center gap-1 ml-auto cursor-pointer underline"
                 >
                   <span>View Details & Timeline</span>
                   <ArrowRight className="w-3.5 h-3.5" />

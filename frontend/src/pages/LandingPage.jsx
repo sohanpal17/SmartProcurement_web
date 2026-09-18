@@ -59,9 +59,9 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-[#1C2C24] font-sans antialiased selection:bg-[#C5A059] selection:text-white">
+    <div className="min-h-screen bg-[#F4F3EF] text-[#0F284A] font-sans antialiased selection:bg-[#DFB15B] selection:text-[#0A1F3E]">
       {/* 1. TOP UTILITY HEADER BAR */}
-      <div className="bg-[#0D1F16]/90 backdrop-blur-md text-white/80 text-xs py-2 px-4 sm:px-8 border-b border-white/10 flex flex-wrap items-center justify-between gap-3 sticky top-0 z-50">
+      <div className="bg-[#091B36]/90 backdrop-blur-md text-white/80 text-xs py-2 px-4 sm:px-8 border-b border-white/10 flex flex-wrap items-center justify-between gap-3 sticky top-0 z-50">
         <div className="font-medium tracking-wide text-white/90">
           Department of Food & Public Distribution
         </div>
@@ -71,16 +71,20 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
             Skip to main content
           </a>
           <span className="text-white/30 hidden md:inline">|</span>
+          <button onClick={onOpenLogin} className="hover:text-[#DFB15B] cursor-pointer transition-colors">
+            Centre administration
+          </button>
+          <span className="text-white/30">|</span>
           <span className="hover:text-white cursor-pointer transition-colors">English</span>
           <span className="text-white/30">|</span>
-          <span className="text-amber-300 font-semibold flex items-center gap-1.5">
+          <span className="text-[#DFB15B] font-semibold flex items-center gap-1.5">
             Helpline: <strong className="text-white font-bold">1800 180 1551</strong>
           </span>
           <span className="text-white/30">|</span>
           {authUser ? (
             <button
               onClick={onEnterDashboard}
-              className="bg-[#C5A059] hover:bg-[#B58F47] text-[#0F261B] px-3 py-1 rounded font-bold text-xs transition-all flex items-center gap-1 cursor-pointer shadow-xs"
+              className="bg-[#DFB15B] hover:bg-[#CFA14B] text-[#0A1F3E] px-3 py-1 rounded font-bold text-xs transition-all flex items-center gap-1 cursor-pointer shadow-xs"
             >
               <UserCheck className="w-3.5 h-3.5" />
               <span>Go to Admin Dashboard</span>
@@ -88,7 +92,7 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
           ) : (
             <button
               onClick={onOpenLogin}
-              className="bg-[#C5A059] hover:bg-[#B58F47] text-[#0F261B] px-3 py-1 rounded font-bold text-xs transition-all flex items-center gap-1 cursor-pointer shadow-xs"
+              className="bg-[#DFB15B] hover:bg-[#CFA14B] text-[#0A1F3E] px-3 py-1 rounded font-bold text-xs transition-all flex items-center gap-1 cursor-pointer shadow-xs"
             >
               <span>Officer Portal Login</span>
               <ArrowRight className="w-3 h-3" />
@@ -98,7 +102,7 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
       </div>
 
       {/* HERO CONTAINER WITH BACKGROUND IMAGE & NAVIGATION */}
-      <div className="relative min-h-[640px] lg:min-h-[720px] flex flex-col justify-between bg-[#09130E] overflow-hidden">
+      <div className="relative min-h-[640px] lg:min-h-[720px] flex flex-col justify-between bg-[#071830] overflow-hidden">
         {/* Background Image: Farmer in wheat field */}
         <img
           src="https://images.pexels.com/photos/2301903/pexels-photo-2301903.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1100&w=1900"
@@ -106,40 +110,38 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
           className="absolute inset-0 w-full h-full object-cover object-center scale-105 brightness-110 contrast-[1.02]"
         />
 
-        {/* Exact Hero Shade Gradient Overlay matching original design */}
+        {/* Exact Hero Shade Gradient Overlay matching design */}
         <div className="hero-shade absolute inset-0 pointer-events-none"></div>
 
         {/* MAIN NAVIGATION BAR */}
         <header className="relative z-10 max-w-7xl w-full mx-auto px-4 sm:px-8 py-6 flex items-center justify-between gap-6">
           {/* Brand Logo */}
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-full border-2 border-white flex items-center justify-center bg-black/30 backdrop-blur-md shrink-0 shadow-md">
-              <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                <path d="M12 2v20M12 6c-3.5 0-6 2.5-6 6M12 12c3.5 0 6-2.5 6-6M12 18c-3.5 0-6-2.5-6-6" />
-              </svg>
+            <div className="w-12 h-12 rounded-full border-2 border-white flex items-center justify-center bg-white shrink-0 shadow-md overflow-hidden">
+              <img src="/Weblogo.png" alt="SAMARTH Logo" className="w-full h-full object-cover rounded-full" />
             </div>
             <div>
               <div className="font-serif text-2xl font-bold tracking-tight text-white leading-none drop-shadow-md">
-                ANNA SETU
+                SAMARTH
               </div>
-              <div className="text-[10px] font-bold tracking-[0.25em] text-[#D8B467] uppercase mt-1 drop-shadow-sm">
-                FARMER PROCUREMENT SERVICE
+              <div className="text-[10px] font-bold tracking-wider text-[#DFB15B] uppercase mt-1 drop-shadow-sm">
+                Smart Agricultural Management & Resource Tracking Hub
               </div>
             </div>
           </div>
 
           {/* Navigation Links */}
           <nav className="hidden lg:flex items-center gap-8 text-sm font-semibold text-white drop-shadow-sm">
-            <button onClick={() => scrollToSection("journey")} className="hover:text-amber-300 transition-colors cursor-pointer">
+            <button onClick={() => scrollToSection("journey")} className="hover:text-[#DFB15B] transition-colors cursor-pointer">
               Procurement process
             </button>
-            <button onClick={() => scrollToSection("locator")} className="hover:text-amber-300 transition-colors cursor-pointer">
+            <button onClick={() => scrollToSection("locator")} className="hover:text-[#DFB15B] transition-colors cursor-pointer">
               Find a centre
             </button>
-            <button onClick={() => scrollToSection("standards")} className="hover:text-amber-300 transition-colors cursor-pointer">
+            <button onClick={() => scrollToSection("standards")} className="hover:text-[#DFB15B] transition-colors cursor-pointer">
               Quality standards
             </button>
-            <button onClick={() => scrollToSection("help")} className="hover:text-amber-300 transition-colors cursor-pointer">
+            <button onClick={() => scrollToSection("help")} className="hover:text-[#DFB15B] transition-colors cursor-pointer">
               Farmer help
             </button>
           </nav>
@@ -149,7 +151,7 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
             {authUser ? (
               <button
                 onClick={onEnterDashboard}
-                className="hidden sm:flex items-center gap-2 bg-[#C5A059] hover:bg-[#B58F47] text-[#0F261B] px-5 py-2.5 rounded-full font-bold text-xs tracking-wider uppercase transition-all cursor-pointer shadow-lg"
+                className="hidden sm:flex items-center gap-2 bg-[#DFB15B] hover:bg-[#CFA14B] text-[#0A1F3E] px-5 py-2.5 rounded-full font-bold text-xs tracking-wider uppercase transition-all cursor-pointer shadow-lg"
               >
                 <span>Enter Workstation ({authUser.role})</span>
               </button>
@@ -170,8 +172,8 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
           <div className="max-w-3xl space-y-6">
             {/* Gold Eyebrow */}
             <div className="flex items-center gap-3">
-              <span className="w-8 h-[2px] bg-[#C5A059]"></span>
-              <span className="text-xs sm:text-sm font-bold tracking-[0.25em] text-[#C5A059] uppercase">
+              <span className="w-8 h-[2px] bg-[#DFB15B]"></span>
+              <span className="text-xs sm:text-sm font-bold tracking-[0.25em] text-[#DFB15B] uppercase">
                 FROM FARM GATE TO FAIR PAYMENT
               </span>
             </div>
@@ -190,7 +192,7 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
             <div className="pt-4 flex flex-wrap items-center gap-4">
               <button
                 onClick={() => scrollToSection("locator")}
-                className="bg-[#C5A059] hover:bg-[#B58F47] text-[#12231A] px-7 py-3.5 rounded font-bold text-sm tracking-wide transition-all cursor-pointer flex items-center gap-2 shadow-xl hover:translate-x-0.5"
+                className="bg-[#DEC181] hover:bg-[#DFB15B] text-[#0A1F3E] px-7 py-3.5 rounded font-bold text-sm tracking-wide transition-all cursor-pointer flex items-center gap-2 shadow-xl hover:translate-x-0.5"
               >
                 <span>Find your centre</span>
                 <ArrowRight className="w-4 h-4" />
@@ -198,7 +200,7 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
 
               <button
                 onClick={() => scrollToSection("journey")}
-                className="border border-white/70 hover:border-white text-white hover:bg-white/10 px-7 py-3.5 rounded font-bold text-sm tracking-wide transition-all cursor-pointer backdrop-blur-xs"
+                className="border border-white/60 hover:border-white text-white hover:bg-white/10 px-7 py-3.5 rounded font-bold text-sm tracking-wide transition-all cursor-pointer backdrop-blur-xs"
               >
                 Know the process
               </button>
@@ -210,7 +212,7 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
         <div className="relative z-10 max-w-7xl w-full mx-auto px-4 sm:px-8 pb-6 flex justify-end">
           <button
             onClick={() => scrollToSection("season-update")}
-            className="text-[11px] font-bold tracking-[0.25em] text-white/70 hover:text-amber-300 uppercase transition-colors flex items-center gap-2 cursor-pointer"
+            className="text-[11px] font-bold tracking-[0.25em] text-white/70 hover:text-[#DFB15B] uppercase transition-colors flex items-center gap-2 cursor-pointer"
           >
             <span>— SCROLL TO LEARN</span>
           </button>
@@ -218,37 +220,37 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
       </div>
 
       {/* 2. SEASON UPDATE BANNER */}
-      <div id="season-update" className="bg-[#FFFDF9] border-b border-[#EAE5D9] py-4 px-4 sm:px-8">
+      <div id="season-update" className="bg-[#F4F3EF] border-b border-[#E5E2D8] py-4 px-4 sm:px-8">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 text-xs sm:text-sm">
           <div className="flex items-center gap-3 flex-1 min-w-[280px]">
-            <span className="font-bold tracking-wider text-[#C5A059] uppercase shrink-0">
+            <span className="font-bold tracking-wider text-[#DFB15B] uppercase shrink-0">
               | SEASON UPDATE
             </span>
-            <p className="text-[#3A453F] font-medium leading-normal">
+            <p className="text-[#1B2B42] font-medium leading-normal">
               Kharif procurement is now open. Farmers are advised to carry their registration ID, bank passbook and land record.
             </p>
           </div>
 
           <button
             onClick={() => scrollToSection("journey")}
-            className="text-[#C5A059] hover:text-[#A6823B] font-bold flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer"
+            className="text-[#10325B] hover:text-[#0A1F3E] font-bold flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer"
           >
             <span>View advisory</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 text-[#DFB15B]" />
           </button>
         </div>
       </div>
 
       {/* 3. YOUR JOURNEY AT THE CENTRE */}
-      <section id="journey" className="py-16 sm:py-24 px-4 sm:px-8 bg-[#FAF8F5]">
+      <section id="journey" className="py-16 sm:py-24 px-4 sm:px-8 bg-[#F4F3EF]">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
           {/* Left Column Description */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="text-xs font-bold tracking-[0.2em] text-[#C5A059] uppercase">
+            <div className="text-xs font-bold tracking-[0.2em] text-[#DFB15B] uppercase">
               SIMPLE AND ACCOUNTABLE
             </div>
 
-            <h2 className="font-serif text-4xl sm:text-5xl font-normal text-[#1C2C24] leading-tight">
+            <h2 className="font-serif text-4xl sm:text-5xl font-normal text-[#0F284A] leading-tight">
               Your journey at the centre
             </h2>
 
@@ -259,9 +261,9 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
 
           {/* Right Column Numbered Process Steps */}
           <div className="lg:col-span-7 space-y-8">
-            <div className="border-t border-[#E5DFD1] pt-6 grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
-              <div className="sm:col-span-2 font-serif text-2xl font-bold text-[#C5A059]">01</div>
-              <div className="sm:col-span-5 font-serif text-xl font-medium text-[#1C2C24]">
+            <div className="border-t border-[#E3E0D5] pt-6 grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
+              <div className="sm:col-span-2 font-serif text-2xl font-bold text-[#DFB15B]">01</div>
+              <div className="sm:col-span-5 font-serif text-xl font-medium text-[#0F284A]">
                 Register your arrival
               </div>
               <div className="sm:col-span-5 text-sm text-slate-600 leading-relaxed">
@@ -269,9 +271,9 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
               </div>
             </div>
 
-            <div className="border-t border-[#E5DFD1] pt-6 grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
-              <div className="sm:col-span-2 font-serif text-2xl font-bold text-[#C5A059]">02</div>
-              <div className="sm:col-span-5 font-serif text-xl font-medium text-[#1C2C24]">
+            <div className="border-t border-[#E3E0D5] pt-6 grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
+              <div className="sm:col-span-2 font-serif text-2xl font-bold text-[#DFB15B]">02</div>
+              <div className="sm:col-span-5 font-serif text-xl font-medium text-[#0F284A]">
                 Quality assessment
               </div>
               <div className="sm:col-span-5 text-sm text-slate-600 leading-relaxed">
@@ -279,23 +281,23 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
               </div>
             </div>
 
-            <div className="border-t border-[#E5DFD1] pt-6 grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
-              <div className="sm:col-span-2 font-serif text-2xl font-bold text-[#C5A059]">03</div>
-              <div className="sm:col-span-5 font-serif text-xl font-medium text-[#1C2C24]">
+            <div className="border-t border-[#E3E0D5] pt-6 grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
+              <div className="sm:col-span-2 font-serif text-2xl font-bold text-[#DFB15B]">03</div>
+              <div className="sm:col-span-5 font-serif text-xl font-medium text-[#0F284A]">
                 Weighment & receipt
               </div>
               <div className="sm:col-span-5 text-sm text-slate-600 leading-relaxed">
-                Produce is weighed on a certified digital weighbridge and a computerized gate pass is generated.
+                Produce is weighed on a certified scale and a digital receipt is issued.
               </div>
             </div>
 
-            <div className="border-t border-[#E5DFD1] pt-6 grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
-              <div className="sm:col-span-2 font-serif text-2xl font-bold text-[#C5A059]">04</div>
-              <div className="sm:col-span-5 font-serif text-xl font-medium text-[#1C2C24]">
-                Direct Bank Transfer
+            <div className="border-t border-[#E3E0D5] pt-6 grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
+              <div className="sm:col-span-2 font-serif text-2xl font-bold text-[#DFB15B]">04</div>
+              <div className="sm:col-span-5 font-serif text-xl font-medium text-[#0F284A]">
+                Direct payment
               </div>
               <div className="sm:col-span-5 text-sm text-slate-600 leading-relaxed">
-                Payment is credited directly to your Aadhaar-linked bank account within 48 to 72 hours.
+                The approved amount is transferred directly to your registered bank account.
               </div>
             </div>
           </div>
@@ -303,12 +305,12 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
       </section>
 
       {/* 4. CENTRE LOCATOR SECTION */}
-      <section id="locator" className="py-12 px-4 sm:px-8 bg-[#FAF8F5]">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 overflow-hidden rounded-2xl shadow-xl border border-[#E5DFD1]">
-          {/* Left Dark Green Search Panel */}
-          <div className="lg:col-span-6 bg-[#143324] text-white p-8 sm:p-12 flex flex-col justify-between space-y-8">
+      <section id="locator" className="py-12 px-4 sm:px-8 bg-[#F4F3EF]">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 overflow-hidden rounded-none shadow-xl border border-[#E3E0D5]">
+          {/* Left Dark Navy Search Panel */}
+          <div className="lg:col-span-6 bg-[#10325B] text-white p-8 sm:p-12 flex flex-col justify-between space-y-8">
             <div className="space-y-6">
-              <div className="text-xs font-bold tracking-[0.2em] text-[#C5A059] uppercase">
+              <div className="text-xs font-bold tracking-[0.2em] text-[#DFB15B] uppercase">
                 CENTRE LOCATOR
               </div>
 
@@ -316,42 +318,42 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
                 Find where to bring your produce
               </h2>
 
-              <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+              <p className="text-slate-200 text-sm sm:text-base leading-relaxed">
                 Search by PIN code or village name to see the nearest active procurement centres and opening hours.
               </p>
             </div>
 
             {/* Interactive Search Bar */}
             <form onSubmit={handleSearch} className="space-y-3">
-              <div className="flex items-center border-b border-[#2C5E47] pb-2 focus-within:border-[#C5A059] transition-colors">
+              <div className="flex items-center border-b border-[#244F84] pb-2 focus-within:border-[#DFB15B] transition-colors">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Enter PIN code or village"
-                  className="w-full bg-transparent text-white placeholder-slate-400 text-sm focus:outline-none"
+                  className="w-full bg-transparent text-white placeholder-slate-300 text-sm focus:outline-none"
                 />
                 <button
                   type="submit"
-                  className="bg-[#C5A059] hover:bg-[#B58F47] text-[#0F261B] px-5 py-2.5 rounded font-bold text-xs tracking-wider uppercase shrink-0 transition-colors cursor-pointer flex items-center gap-1"
+                  className="bg-[#DEC181] hover:bg-[#DFB15B] text-[#0A1F3E] px-5 py-2.5 rounded font-bold text-xs tracking-wider uppercase shrink-0 transition-colors cursor-pointer flex items-center gap-1"
                 >
                   <span>Search</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
-              <p className="text-[11px] text-slate-400">Location services are not required.</p>
+              <p className="text-[11px] text-slate-300">Location services are not required.</p>
             </form>
           </div>
 
-          {/* Right Cream List Panel */}
-          <div className="lg:col-span-6 bg-[#F4F0E6] p-8 sm:p-12 flex flex-col justify-between space-y-6">
+          {/* Right Light Sand List Panel */}
+          <div className="lg:col-span-6 bg-[#EEF0F2] p-8 sm:p-12 flex flex-col justify-between space-y-6">
             <div>
-              <div className="flex items-center justify-between text-xs pb-3 border-b border-[#D8D2C4]">
+              <div className="flex items-center justify-between text-xs pb-3 border-b border-[#D5D8DC]">
                 <div>
-                  <span className="font-bold tracking-widest text-[#C5A059] uppercase block text-[10px]">
+                  <span className="font-bold tracking-widest text-[#DFB15B] uppercase block text-[10px]">
                     NEARBY CENTRES
                   </span>
-                  <h3 className="font-serif text-2xl font-normal text-[#1C2C24] mt-0.5">
+                  <h3 className="font-serif text-2xl font-normal text-[#0F284A] mt-0.5">
                     Erode district
                   </h3>
                 </div>
@@ -359,19 +361,19 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
               </div>
 
               {/* List items */}
-              <div className="divide-y divide-[#D8D2C4]">
+              <div className="divide-y divide-[#D5D8DC]">
                 {filteredCentres.map((centre) => (
                   <div key={centre.id} className="py-5 flex items-start justify-between gap-4 group">
                     <div className="flex items-start gap-4">
-                      <span className="font-serif text-lg font-bold text-[#C5A059]">{centre.id}</span>
+                      <span className="font-serif text-lg font-bold text-[#DFB15B]">{centre.id}</span>
                       <div>
-                        <h4 className="font-serif text-lg font-medium text-[#1C2C24] group-hover:text-[#143324] transition-colors">
+                        <h4 className="font-serif text-lg font-medium text-[#0F284A] group-hover:text-[#10325B] transition-colors">
                           {centre.name}
                         </h4>
                         <p className="text-xs text-slate-600 mt-1">{centre.address}</p>
                       </div>
                     </div>
-                    <span className="font-bold text-xs text-[#1C2C24] shrink-0 pt-1">{centre.distance}</span>
+                    <span className="font-bold text-xs text-[#0F284A] shrink-0 pt-1">{centre.distance}</span>
                   </div>
                 ))}
               </div>
@@ -381,10 +383,10 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
       </section>
 
       {/* 5. QUALITY STANDARDS / BEFORE YOU ARRIVE */}
-      <section id="standards" className="py-16 sm:py-24 px-4 sm:px-8 bg-[#FAF8F5]">
+      <section id="standards" className="py-16 sm:py-24 px-4 sm:px-8 bg-[#F4F3EF]">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Left Image: Grain holding hands over yellow sack */}
-          <div className="lg:col-span-6 rounded-2xl overflow-hidden shadow-2xl border border-[#E5DFD1]">
+          <div className="lg:col-span-6 rounded-none overflow-hidden shadow-2xl border border-[#E3E0D5]">
             <img
               src="https://images.pexels.com/photos/9854639/pexels-photo-9854639.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=900&w=1000"
               alt="Wheat Produce Quality Assessment"
@@ -394,11 +396,11 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
 
           {/* Right Quality Standards Specs */}
           <div className="lg:col-span-6 space-y-6">
-            <div className="text-xs font-bold tracking-[0.2em] text-[#C5A059] uppercase">
+            <div className="text-xs font-bold tracking-[0.2em] text-[#DFB15B] uppercase">
               BEFORE YOU ARRIVE
             </div>
 
-            <h2 className="font-serif text-3xl sm:text-5xl font-normal text-[#1C2C24] leading-tight">
+            <h2 className="font-serif text-3xl sm:text-5xl font-normal text-[#0F284A] leading-tight">
               Prepare your produce for acceptance
             </h2>
 
@@ -407,29 +409,29 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
             </p>
 
             <div className="space-y-4 pt-2">
-              <div className="border-t border-[#E5DFD1] pt-4 grid grid-cols-1 sm:grid-cols-12 gap-2 text-sm">
-                <div className="sm:col-span-4 font-bold text-[#15803D]">Moisture</div>
-                <div className="sm:col-span-8 text-slate-700">Within the notified limit for the crop (Max 12%)</div>
+              <div className="border-t border-[#E3E0D5] pt-4 grid grid-cols-1 sm:grid-cols-12 gap-2 text-sm">
+                <div className="sm:col-span-4 font-bold text-[#10325B]">Moisture</div>
+                <div className="sm:col-span-8 text-slate-700">Within the notified limit for the crop</div>
               </div>
 
-              <div className="border-t border-[#E5DFD1] pt-4 grid grid-cols-1 sm:grid-cols-12 gap-2 text-sm">
-                <div className="sm:col-span-4 font-bold text-[#15803D]">Foreign matter</div>
-                <div className="sm:col-span-8 text-slate-700">Produce should be clean and free of debris & stones</div>
+              <div className="border-t border-[#E3E0D5] pt-4 grid grid-cols-1 sm:grid-cols-12 gap-2 text-sm">
+                <div className="sm:col-span-4 font-bold text-[#10325B]">Foreign matter</div>
+                <div className="sm:col-span-8 text-slate-700">Produce should be clean and free of debris</div>
               </div>
 
-              <div className="border-t border-[#E5DFD1] pt-4 grid grid-cols-1 sm:grid-cols-12 gap-2 text-sm">
-                <div className="sm:col-span-4 font-bold text-[#15803D]">Packing</div>
-                <div className="sm:col-span-8 text-slate-700">Use clean, dry and serviceable gunny bags</div>
+              <div className="border-t border-[#E3E0D5] pt-4 grid grid-cols-1 sm:grid-cols-12 gap-2 text-sm">
+                <div className="sm:col-span-4 font-bold text-[#10325B]">Packing</div>
+                <div className="sm:col-span-8 text-slate-700">Use clean, dry and serviceable bags</div>
               </div>
             </div>
 
             <div className="pt-4">
               <button
                 onClick={() => alert("Redirecting to notified Fair Average Quality (FAQ) standards documentation.")}
-                className="text-[#15803D] hover:text-[#166534] font-bold text-sm flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="text-[#10325B] hover:text-[#0A1F3E] font-bold text-sm flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <span>Read crop-wise standards</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 text-[#DFB15B]" />
               </button>
             </div>
           </div>
@@ -437,13 +439,13 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
       </section>
 
       {/* 6. FARMER ASSISTANCE SECTION */}
-      <section id="help" className="py-16 sm:py-20 px-4 sm:px-8 bg-[#EFECE6] border-t border-b border-[#E0DACD]">
+      <section id="help" className="py-16 sm:py-20 px-4 sm:px-8 bg-[#EDE8DF] border-t border-b border-[#DFDAD0]">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           <div className="lg:col-span-6 space-y-4">
-            <div className="text-xs font-bold tracking-[0.2em] text-[#C5A059] uppercase">
+            <div className="text-xs font-bold tracking-[0.2em] text-[#DFB15B] uppercase">
               FARMER ASSISTANCE
             </div>
-            <h2 className="font-serif text-3xl sm:text-4xl font-normal text-[#1C2C24]">
+            <h2 className="font-serif text-3xl sm:text-4xl font-normal text-[#0F284A]">
               Need help at any stage?
             </h2>
             <p className="text-slate-600 text-sm sm:text-base">
@@ -456,7 +458,7 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
                 TOLL-FREE HELPLINE
               </span>
-              <span className="font-serif text-2xl sm:text-3xl font-bold text-[#1C2C24] block mt-1">
+              <span className="font-serif text-2xl sm:text-3xl font-bold text-[#0F284A] block mt-1">
                 1800 180 1551
               </span>
             </div>
@@ -465,8 +467,8 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
                 WRITE TO US
               </span>
-              <span className="font-serif text-xl sm:text-2xl font-bold text-[#1C2C24] block mt-1">
-                help@annasetu.gov.in
+              <span className="font-serif text-xl sm:text-2xl font-bold text-[#0F284A] block mt-1">
+                help@smartprocure.gov.in
               </span>
             </div>
           </div>
@@ -474,9 +476,9 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
       </section>
 
       {/* 7. FOOTER BAR */}
-      <footer className="bg-[#0C1D15] text-slate-300 py-12 px-4 sm:px-8 border-t border-[#1C4230]">
+      <footer className="bg-[#0A1F3E] text-slate-300 py-12 px-4 sm:px-8 border-t border-[#183963]">
         <div className="max-w-7xl mx-auto space-y-8">
-          <div className="flex flex-wrap items-center justify-between gap-6 pb-8 border-b border-[#1C4230]">
+          <div className="flex flex-wrap items-center justify-between gap-6 pb-8 border-b border-[#183963]">
             {/* Footer Brand Logo */}
             <div className="flex items-center gap-3.5">
               <div className="w-10 h-10 rounded-full border border-white/60 flex items-center justify-center bg-white/10 shrink-0">
@@ -486,9 +488,9 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
               </div>
               <div>
                 <div className="font-serif text-xl font-bold tracking-tight text-white leading-none">
-                  ANNA SETU
+                  SmartProcure
                 </div>
-                <div className="text-[9px] font-bold tracking-[0.25em] text-[#C5A059] uppercase mt-1">
+                <div className="text-[9px] font-bold tracking-[0.25em] text-[#DFB15B] uppercase mt-1">
                   FARMER PROCUREMENT SERVICE
                 </div>
               </div>
@@ -501,11 +503,11 @@ export const LandingPage = ({ onOpenLogin, onEnterDashboard, authUser }) => {
               <a href="#terms" className="hover:text-white transition-colors">Terms of use</a>
               <a href="#contact" className="hover:text-white transition-colors">Contact directory</a>
               {authUser ? (
-                <button onClick={onEnterDashboard} className="text-amber-300 hover:underline font-bold cursor-pointer">
+                <button onClick={onEnterDashboard} className="text-[#DFB15B] hover:underline font-bold cursor-pointer">
                   Officer Dashboard
                 </button>
               ) : (
-                <button onClick={onOpenLogin} className="text-amber-300 hover:underline font-bold cursor-pointer">
+                <button onClick={onOpenLogin} className="text-[#DFB15B] hover:underline font-bold cursor-pointer">
                   Officer Login
                 </button>
               )}

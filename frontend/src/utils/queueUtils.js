@@ -8,8 +8,6 @@ export const getStageOfficerRole = (stageKey) => {
       return ROLES.WEIGHING;
     case "quality":
       return ROLES.QUALITY;
-    case "procurement":
-      return ROLES.PROCUREMENT;
     case "payment":
       return ROLES.PAYMENT;
     default:
@@ -17,13 +15,12 @@ export const getStageOfficerRole = (stageKey) => {
   }
 };
 
-export const STAGE_ORDER = ["arrival", "weighing", "quality", "procurement", "payment"];
+export const STAGE_ORDER = ["arrival", "weighing", "quality", "payment"];
 
 export const STAGE_LABELS = {
   arrival: "Check-in / Arrival",
-  weighing: "Weighbridge",
+  weighing: "Weighing",
   quality: "Quality Check",
-  procurement: "Procurement Payout",
   payment: "Payment Confirmation",
 };
 
@@ -162,9 +159,9 @@ export const calculateRescheduleOptions = (farmer, slotConfig, farmers) => {
 export const filterTokensByTab = (farmers, tab) => {
   switch (tab) {
     case "waiting":
-      return farmers.filter((f) => f.status === "BOOKED" || f.status === "ARRIVED");
+      return farmers.filter((f) => f.status === "BOOKED" || f.status === "ARRIVED" || f.status === "ARRIVAL" || f.currentStage === "arrival");
     case "active":
-      return farmers.filter((f) => ["ARRIVED", "WEIGHING", "QUALITY", "PROCUREMENT", "PAYMENT"].includes(f.status));
+      return farmers.filter((f) => ["ARRIVED", "ARRIVAL", "WEIGHING", "QUALITY", "PAYMENT"].includes(f.status) || (f.currentStage && f.status !== "COMPLETED"));
     case "late":
       return farmers.filter((f) => f.status === "LATE");
     case "flagged":
@@ -174,4 +171,40 @@ export const filterTokensByTab = (farmers, tab) => {
     default:
       return farmers;
   }
+};
+
+export const getDisplaySlot = (farmer) => {
+  if (!farmer) return "Morning";
+  const slot = farmer.slot;
+  const batchStr = (farmer.batch || "").toLowerCase();
+
+  if (
+    batchStr.includes("afternoon") ||
+    batchStr.includes("12:") ||
+    batchStr.includes("01:") ||
+    batchStr.includes("1:") ||
+    batchStr.includes("02:") ||
+    batchStr.includes("2:") ||
+    batchStr.includes("03:") ||
+    batchStr.includes("3:")
+  ) {
+    return "Afternoon";
+  }
+  if (
+    batchStr.includes("evening") ||
+    batchStr.includes("05:") ||
+    batchStr.includes("5:") ||
+    batchStr.includes("06:") ||
+    batchStr.includes("6:") ||
+    batchStr.includes("07:00 pm") ||
+    batchStr.includes("7:00 pm") ||
+    batchStr.includes("08:") ||
+    batchStr.includes("8:")
+  ) {
+    return "Evening";
+  }
+  if (slot && ["Morning", "Afternoon", "Evening"].includes(slot)) {
+    return slot;
+  }
+  return "Morning";
 };

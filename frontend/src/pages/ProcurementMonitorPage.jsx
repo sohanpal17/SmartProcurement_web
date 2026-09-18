@@ -22,7 +22,7 @@ export const ProcurementMonitorPage = ({ onOpenFarmerDetails }) => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 overflow-x-auto pb-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 overflow-x-auto pb-4">
         {STAGE_ORDER.map((stageKey, idx) => {
           const stageList = getStageFarmers(stageKey);
           return (
@@ -79,7 +79,7 @@ export const ProcurementMonitorPage = ({ onOpenFarmerDetails }) => {
           <div>
             <h4 className="text-sm font-bold">Total Completed & Paid Today</h4>
             <p className="text-xs text-blue-200">
-              {completedFarmers.length} Farmers successfully processed through all 5 Mandi procurement stages.
+              {completedFarmers.length} Farmers successfully processed through all 4 Mandi procurement stages.
             </p>
           </div>
         </div>

@@ -16,11 +16,23 @@ async function seedDemo() {
 
         console.log("Centres:", centres.rows);
 
+        const FARMER_NAMES = [
+            "Suresh Jagdale", "Santosh Deshmukh", "Ananda Shinde", "Ganesh Pawar", 
+            "Sunil More", "Vijay Kulkarni", "Dnyaneshwar Jadhav", "Baban Kadam", 
+            "Eknath Bhosale", "Pandurang Chaudhari", "Rajendra Shelke", "Vishnu Gaikwad", 
+            "Navnath Thorat", "Balasaheb Kambale", "Namdeo Wagh", "Maruti Garad", 
+            "Subhash Dhage", "Devidas Salunke", "Bhagwan Shirke", "Sanjay Borse",
+            "Tukaram Hande", "Mahadev Gawande", "Laxman Nikam", "Kalyan Phalke",
+            "Sharad Bhor", "Vitthal Mankar", "Nivrutti Khot", "Gorakh Sangle",
+            "Raghunath Sawant", "Janardhan Mohite", "Dattatray Kokate", "Sudam Zagade"
+        ];
+
         let farmerNumber = 1000;
 
         async function createBooking(centreId, tokenNo, status = "WAITING") {
-
             farmerNumber++;
+            const nameIndex = (farmerNumber - 1001) % FARMER_NAMES.length;
+            const farmerName = FARMER_NAMES[nameIndex];
 
             const farmerResult = await pool.query(
                 `INSERT INTO farmers
@@ -29,8 +41,8 @@ async function seedDemo() {
                 RETURNING id`,
                 [
                     `FMR-${farmerNumber}`,
-                    `Demo Farmer ${farmerNumber}`,
-                    `900000${farmerNumber}`
+                    farmerName,
+                    `98220${Math.floor(10000 + Math.random() * 90000)}`
                 ]
             );
 

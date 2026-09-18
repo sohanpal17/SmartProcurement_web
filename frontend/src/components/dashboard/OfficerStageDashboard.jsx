@@ -5,7 +5,7 @@ import { getStageOfficerRole } from "../../utils/permissions";
 import { STAGE_LABELS } from "../../utils/queueUtils";
 import { Workflow, CheckCircle2 } from "lucide-react";
 
-export const OfficerStageDashboard = ({ onOpenFlag, onOpenFarmerDetails }) => {
+export const OfficerStageDashboard = ({ onOpenFlag, onOpenFarmerDetails, onOpenStageModal }) => {
   const { currentDemoRole, farmers } = useApp();
 
   const activeTokens = farmers.filter((f) => f.status !== "COMPLETED");
@@ -64,6 +64,7 @@ export const OfficerStageDashboard = ({ onOpenFlag, onOpenFarmerDetails }) => {
                 farmer={farmer}
                 onOpenFlag={onOpenFlag}
                 onOpenFarmerDetails={onOpenFarmerDetails}
+                onOpenStageModal={onOpenStageModal}
               />
             ))}
           </div>
@@ -87,6 +88,7 @@ export const OfficerStageDashboard = ({ onOpenFlag, onOpenFarmerDetails }) => {
               farmer={farmer}
               onOpenFlag={onOpenFlag}
               onOpenFarmerDetails={onOpenFarmerDetails}
+              onOpenStageModal={onOpenStageModal}
             />
           ))}
         </div>

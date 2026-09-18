@@ -33,7 +33,7 @@ export const CentreManagementPage = () => {
     longitude: "73.0077",
     supportedCommodities: ["Wheat", "Paddy / Rice"],
     batchCapacity: 30,
-    dailyCapacity: 100,
+    dailyCapacity: 90,
     operationalStatus: "Active",
   });
 
@@ -68,7 +68,7 @@ export const CentreManagementPage = () => {
       longitude: "73.0077",
       supportedCommodities: ["Wheat", "Paddy / Rice"],
       batchCapacity: 30,
-      dailyCapacity: 100,
+      dailyCapacity: 90,
       operationalStatus: "Active",
     });
   };
@@ -152,7 +152,7 @@ export const CentreManagementPage = () => {
             >
               {availableDistricts.map((d) => (
                 <option key={d} value={d}>
-                  {d === "All" ? "📍 All Districts" : `📍 ${d}`}
+                  {d === "All" ? "All Districts" : d}
                 </option>
               ))}
             </select>
@@ -168,7 +168,7 @@ export const CentreManagementPage = () => {
               onChange={(e) => setSelectedCommodity(e.target.value)}
               className="w-full px-3 py-2 bg-slate-50 text-xs font-bold text-slate-800 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0F2B5C]"
             >
-              <option value="All">🌾 All Commodities</option>
+              <option value="All">All Commodities</option>
               {availableCommodities.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
@@ -185,10 +185,10 @@ export const CentreManagementPage = () => {
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="w-full px-3 py-2 bg-slate-50 text-xs font-bold text-slate-800 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0F2B5C]"
             >
-              <option value="All">⚡ All Statuses</option>
-              <option value="Active">🟢 Active</option>
-              <option value="Maintenance">🟡 Maintenance</option>
-              <option value="Inactive">🔴 Inactive</option>
+              <option value="All">All Statuses</option>
+              <option value="Active">Active</option>
+              <option value="Maintenance">Maintenance</option>
+              <option value="Inactive">Inactive</option>
             </select>
           </div>
         </div>
@@ -262,7 +262,7 @@ export const CentreManagementPage = () => {
                           key={comm}
                           className="px-2 py-0.5 bg-blue-50 text-[#0F2B5C] border border-blue-200 text-[10px] font-bold rounded-md"
                         >
-                          🌾 {comm}
+                          {comm}
                         </span>
                       ))}
                     </div>
@@ -295,7 +295,7 @@ export const CentreManagementPage = () => {
                 onClick={() => setIsRegisterOpen(false)}
                 className="text-white hover:text-amber-300 font-bold text-base cursor-pointer"
               >
-                ✕
+                X
               </button>
             </div>
 
@@ -387,9 +387,9 @@ export const CentreManagementPage = () => {
                     onChange={(e) => setFormData({ ...formData, operationalStatus: e.target.value })}
                     className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-xl font-bold"
                   >
-                    <option value="Active">🟢 Active</option>
-                    <option value="Maintenance">🟡 Maintenance</option>
-                    <option value="Inactive">🔴 Inactive</option>
+                    <option value="Active">Active</option>
+                    <option value="Maintenance">Maintenance</option>
+                    <option value="Inactive">Inactive</option>
                   </select>
                 </div>
               </div>
@@ -412,7 +412,7 @@ export const CentreManagementPage = () => {
                             : "bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200"
                         }`}
                       >
-                        {isSelected ? "✓ " : "+ "}{comm}
+                        {isSelected ? "Selected: " : "+ "}{comm}
                       </button>
                     );
                   })}

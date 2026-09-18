@@ -77,21 +77,33 @@ export function LoginModal({ isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="bg-slate-100 rounded-2xl shadow-2xl max-w-xl w-full border border-slate-300 overflow-hidden animate-fade-in my-8">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4 overflow-y-auto cursor-pointer"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && onClose) {
+          onClose();
+        }
+      }}
+    >
+      <div
+        className="bg-slate-100 rounded-2xl shadow-2xl max-w-xl w-full border border-slate-300 overflow-hidden animate-fade-in my-8 cursor-default"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Top Government Title Header */}
         <div className="bg-[#0F2B5C] text-white p-4 sm:p-5 flex items-center justify-between border-b border-amber-400">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#0F2B5C]">
-              <Landmark className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#0F2B5C] overflow-hidden border border-amber-400">
+              <img src="/Weblogo.png" alt="SAMARTH Logo" className="w-full h-full object-cover rounded-full" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-black tracking-tight text-white">SmartProcure Admin Portal</h2>
-              <p className="text-xs text-blue-200 font-medium">Department of Agricultural Marketing — Government Procurement Portal</p>
+              <h2 className="text-base sm:text-lg font-black tracking-tight text-white leading-tight">SAMARTH</h2>
+              <p className="text-[10px] font-semibold text-amber-300/90 leading-none mt-0.5">
+                Smart Agricultural Management & Resource Tracking Hub
+              </p>
             </div>
           </div>
           {onClose && authUser && (
-            <button onClick={onClose} className="text-slate-300 hover:text-white font-bold text-lg cursor-pointer">✕</button>
+            <button onClick={onClose} className="text-slate-300 hover:text-white font-bold text-lg cursor-pointer">X</button>
           )}
         </div>
 
@@ -109,50 +121,50 @@ export function LoginModal({ isOpen, onClose }) {
             {/* Quick Access Roles */}
             <div className="bg-blue-50/70 p-4 rounded-xl border border-blue-200 mb-5 space-y-3">
               <span className="text-[10px] font-black uppercase tracking-wider text-[#0F2B5C] block">
-                ⚡ QUICK ACCESS — EVALUATOR DEMO ROLES
+                QUICK ACCESS
               </span>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
                 <button
                   type="button"
                   onClick={() => handleQuickDemoRole(ROLES.ADMIN)}
-                  className="p-2.5 bg-white hover:bg-amber-50 text-[#0F2B5C] font-extrabold rounded-xl border border-blue-200 shadow-2xs text-left cursor-pointer transition flex items-center gap-1.5"
+                  className="p-2.5 bg-white hover:bg-amber-50 text-[#0F2B5C] font-extrabold rounded-xl border border-blue-200 shadow-2xs text-center justify-center cursor-pointer transition flex items-center gap-1 text-[11px] sm:text-xs"
                 >
-                  <span>👑</span> <span>Centre Admin</span>
+                  <span>Centre Admin</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleQuickDemoRole(ROLES.CHECKIN)}
-                  className="p-2.5 bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold rounded-xl border border-emerald-200 shadow-2xs text-left cursor-pointer transition flex items-center gap-1.5"
+                  className="p-2.5 bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold rounded-xl border border-emerald-200 shadow-2xs text-center justify-center cursor-pointer transition flex items-center gap-1 text-[11px] sm:text-xs"
                 >
-                  <span>📌</span> <span>Check-in Staff</span>
+                  <span>Check-in Staff</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleQuickDemoRole(ROLES.WEIGHING)}
-                  className="p-2.5 bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold rounded-xl border border-emerald-200 shadow-2xs text-left cursor-pointer transition flex items-center gap-1.5"
+                  className="p-2.5 bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold rounded-xl border border-emerald-200 shadow-2xs text-center justify-center cursor-pointer transition flex items-center gap-1 text-[11px] sm:text-xs"
                 >
-                  <span>⚖️</span> <span>Weighing Staff</span>
+                  <span>Weighing Staff</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleQuickDemoRole(ROLES.QUALITY)}
-                  className="p-2.5 bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold rounded-xl border border-emerald-200 shadow-2xs text-left cursor-pointer transition flex items-center gap-1.5"
+                  className="p-2.5 bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold rounded-xl border border-emerald-200 shadow-2xs text-center justify-center cursor-pointer transition flex items-center gap-1 text-[11px] sm:text-xs"
                 >
-                  <span>🔬</span> <span>Quality Staff</span>
+                  <span>Quality Staff</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleQuickDemoRole(ROLES.PAYMENT)}
-                  className="p-2.5 bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold rounded-xl border border-emerald-200 shadow-2xs text-left cursor-pointer transition flex items-center gap-1.5"
+                  className="p-2.5 bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold rounded-xl border border-emerald-200 shadow-2xs text-center justify-center cursor-pointer transition flex items-center gap-1 text-[11px] sm:text-xs"
                 >
-                  <span>💳</span> <span>Payment Staff</span>
+                  <span>Payment Staff</span>
                 </button>
               </div>
             </div>
 
             {errorMsg && (
               <div className="p-3 bg-rose-50 text-rose-700 text-xs font-bold rounded-xl border border-rose-200 mb-4">
-                ⚠️ {errorMsg}
+                {errorMsg}
               </div>
             )}
 
@@ -207,7 +219,7 @@ export function LoginModal({ isOpen, onClose }) {
                 disabled={loading}
                 className="w-full py-2.5 bg-[#0F2B5C] hover:bg-[#091C3E] text-white font-extrabold text-xs rounded-xl shadow-md transition cursor-pointer flex items-center justify-center gap-2"
               >
-                {loading ? "Authenticating..." : "➔ Sign In to Portal"}
+                {loading ? "Authenticating..." : "Sign In to Portal"}
               </button>
             </form>
           </div>

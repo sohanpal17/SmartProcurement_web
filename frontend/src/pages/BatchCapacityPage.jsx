@@ -1,29 +1,57 @@
-import React, { useState } from "react";
+import React from "react";
 import { useApp } from "../context/AppContext";
 import {
   Layers,
   Clock,
-  CheckCircle2,
-  AlertTriangle,
-  Lock,
-  Plus,
-  ShieldCheck,
   Building2,
   TrendingUp,
+  Calendar,
 } from "lucide-react";
-import { getCapacityStatusBadge } from "../utils/queueUtils";
 
 export const BatchCapacityPage = () => {
   const { slotConfig, farmers, centres, selectedCentreId } = useApp();
-  const [selectedSlot, setSelectedSlot] = useState("Morning");
 
   const currentCentre = centres.find((c) => c.id === selectedCentreId) || centres[0];
-  const activeSlotObj = slotConfig[selectedSlot];
 
   // Calculate overall centre capacity utilization
   const totalBooked = farmers.filter((f) => f.status !== "CANCELLED").length;
-  const maxDailyCap = currentCentre?.dailyCapacity || 100;
+  const maxDailyCap = currentCentre?.dailyCapacity || 90;
   const utilizationPercentage = Math.min(100, Math.round((totalBooked / maxDailyCap) * 100));
+
+  const slotsList = Object.keys(slotConfig); // ["Morning", "Afternoon", "Evening"]
+
+  const getFarmerSession = (f) => {
+    const slotStr = (f.slot || "").toLowerCase();
+    const batchStr = (f.batch || "").toLowerCase();
+    if (
+      slotStr.includes("afternoon") ||
+      batchStr.includes("afternoon") ||
+      batchStr.includes("12:") ||
+      batchStr.includes("01:") ||
+      batchStr.includes("1:") ||
+      batchStr.includes("02:") ||
+      batchStr.includes("2:") ||
+      batchStr.includes("03:") ||
+      batchStr.includes("3:")
+    ) {
+      return "Afternoon";
+    }
+    if (
+      slotStr.includes("evening") ||
+      batchStr.includes("evening") ||
+      batchStr.includes("05:") ||
+      batchStr.includes("5:") ||
+      batchStr.includes("06:") ||
+      batchStr.includes("6:") ||
+      batchStr.includes("07:00 pm") ||
+      batchStr.includes("7:00 pm") ||
+      batchStr.includes("08:") ||
+      batchStr.includes("8:")
+    ) {
+      return "Evening";
+    }
+    return "Morning";
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -51,7 +79,7 @@ export const BatchCapacityPage = () => {
           <div>
             <span className="text-[10px] uppercase font-bold text-slate-400">Daily Total Capacity</span>
             <div className="text-xl font-black text-slate-900">{maxDailyCap} Farmers / Day</div>
-            <span className="text-[11px] text-slate-500 font-semibold">{currentCentre?.name}</span>
+            <span className="text-[11px] text-slate-500 font-semibold">3 Sessions (30 Farmers per Batch)</span>
           </div>
         </div>
 
@@ -62,7 +90,7 @@ export const BatchCapacityPage = () => {
           <div>
             <span className="text-[10px] uppercase font-bold text-slate-400">Booked Capacity</span>
             <div className="text-xl font-black text-amber-700">{totalBooked} Slots Occupied</div>
-            <span className="text-[11px] text-slate-500 font-semibold">{maxDailyCap - totalBooked} Available</span>
+            <span className="text-[11px] text-slate-500 font-semibold">{Math.max(0, maxDailyCap - totalBooked)} Available</span>
           </div>
         </div>
 
@@ -83,101 +111,94 @@ export const BatchCapacityPage = () => {
         </div>
       </div>
 
-      {/* Slot & Batch Configuration Grid */}
-      <div className="gov-card overflow-hidden">
-        {/* Slot Tabs */}
-        <div className="bg-[#0F2B5C] p-3 text-white flex items-center gap-2 border-b border-blue-900">
-          {Object.keys(slotConfig).map((sName) => {
-            const isActive = selectedSlot === sName;
-            return (
-              <button
-                key={sName}
-                onClick={() => setSelectedSlot(sName)}
-                className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                  isActive
-                    ? "bg-amber-500 text-slate-950 shadow-md"
-                    : "bg-[#162C5B] text-slate-200 hover:bg-[#1A3A73]"
-                }`}
-              >
-                🕒 {sName} Session ({slotConfig[sName].mainTime})
-              </button>
-            );
-          })}
+      {/* Directly Visible Morning, Afternoon, Evening Sessions */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-[#0F2B5C]" />
+            All Sessions & Batch Capacity Limits (90 Farmers Total)
+          </h2>
+          <span className="px-3 py-1 bg-emerald-50 text-emerald-800 text-xs font-bold rounded-lg border border-emerald-200">
+            Server-side Capacity Enforced (30 / Batch)
+          </span>
         </div>
 
-        {/* Batches Table */}
-        <div className="p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div>
-              <h3 className="text-base font-extrabold text-slate-900">
-                {activeSlotObj.name} Batches & Capacity Limits
-              </h3>
-              <p className="text-xs text-slate-500">
-                Official operating window: <strong className="text-slate-800">{activeSlotObj.mainTime}</strong>
-              </p>
-            </div>
-            <span className="px-3 py-1 bg-emerald-50 text-emerald-800 text-xs font-bold rounded-lg border border-emerald-200">
-              ✓ Server-side Capacity Enforced
-            </span>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {slotsList.map((sName) => {
+            const slotObj = slotConfig[sName];
+            const sessionFarmers = farmers.filter(
+              (f) => f.status !== "CANCELLED" && getFarmerSession(f) === sName
+            );
+            const slotBookedCount = sessionFarmers.length;
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {activeSlotObj.batches.map((batch) => {
-              const bookedCount = farmers.filter(
-                (f) => f.slot === selectedSlot && f.batch === batch.name && f.status !== "CANCELLED"
-              ).length;
-              const isFull = bookedCount >= batch.capacity;
-              const avail = Math.max(0, batch.capacity - bookedCount);
-
-              return (
-                <div
-                  key={batch.id}
-                  className={`p-4 rounded-xl border transition-all ${
-                    isFull
-                      ? "bg-rose-50/50 border-rose-200"
-                      : "bg-white border-slate-200 hover:border-blue-400"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-extrabold text-[#0F2B5C] bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">
-                      {batch.name}
-                    </span>
-                    <span
-                      className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
-                        isFull ? "bg-rose-600 text-white" : "bg-emerald-600 text-white"
-                      }`}
-                    >
-                      {isFull ? "FULL" : `${avail} SPACES LEFT`}
-                    </span>
+            return (
+              <div key={sName} className="gov-card overflow-hidden flex flex-col justify-between border-slate-200 shadow-sm">
+                {/* Session Header */}
+                <div className="bg-[#0F2B5C] text-white p-4 flex items-center justify-between border-b border-amber-400/30">
+                  <div>
+                    <h3 className="text-base font-extrabold">{sName} Session</h3>
+                    <p className="text-xs text-blue-200 font-medium">Time: {slotObj.mainTime} • <strong>{slotBookedCount} Farmers Booked</strong></p>
                   </div>
-
-                  <div className="text-xs text-slate-600 font-medium mb-3">
-                    ⏰ Time Window: <strong className="text-slate-900">{batch.time}</strong>
-                  </div>
-
-                  <div className="space-y-1 bg-slate-50 p-3 rounded-lg border border-slate-200 mb-3">
-                    <div className="flex justify-between text-xs font-bold text-slate-700">
-                      <span>Booked Farmers:</span>
-                      <span className="text-[#0F2B5C]">{bookedCount} / {batch.capacity}</span>
-                    </div>
-                    <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                      <div
-                        className={`h-2 rounded-full ${
-                          isFull ? "bg-rose-600" : "bg-[#15803D]"
-                        }`}
-                        style={{ width: `${Math.min(100, (bookedCount / batch.capacity) * 100)}%` }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-500 text-[11px]">Max Capacity per Batch:</span>
-                    <span className="font-extrabold text-slate-900">{batch.capacity} Farmers</span>
+                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-amber-400 font-bold text-xs">
+                    <Clock className="w-4 h-4 text-amber-400" />
                   </div>
                 </div>
-              );
-            })}
-          </div>
+
+                {/* Session Batches List */}
+                <div className="p-5 space-y-4 flex-1">
+                  {slotObj.batches.map((batch) => {
+                    const bookedCount = slotBookedCount;
+                    const batchCapacity = 30; // 30 farmers per batch
+                    const isFull = bookedCount >= batchCapacity;
+                    const avail = Math.max(0, batchCapacity - bookedCount);
+
+                    return (
+                      <div
+                        key={batch.id}
+                        className={`p-4 rounded-xl border transition-all ${
+                          isFull
+                            ? "bg-rose-50/50 border-rose-200"
+                            : "bg-white border-slate-200 hover:border-blue-400"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-extrabold text-[#0F2B5C] bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">
+                            {batch.name}
+                          </span>
+                          <span
+                            className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
+                              isFull ? "bg-rose-600 text-white" : "bg-emerald-600 text-white"
+                            }`}
+                          >
+                            {isFull ? "FULL" : `${avail} SPACES LEFT`}
+                          </span>
+                        </div>
+
+                        <div className="text-xs text-slate-600 font-medium mb-3">
+                          Time Window: <strong className="text-slate-900">{batch.time}</strong>
+                        </div>
+
+                        <div className="space-y-1 bg-slate-50 p-3 rounded-lg border border-slate-200 mb-3">
+                          <div className="flex justify-between text-xs font-bold text-slate-700">
+                            <span>Booked Farmers:</span>
+                            <span className="text-[#0F2B5C]">{bookedCount} / {batchCapacity}</span>
+                          </div>
+                          <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                            <div
+                              className={`h-2 rounded-full ${
+                                isFull ? "bg-rose-600" : "bg-[#15803D]"
+                              }`}
+                              style={{ width: `${Math.min(100, (bookedCount / batchCapacity) * 100)}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

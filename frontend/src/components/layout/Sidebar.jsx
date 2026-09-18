@@ -37,7 +37,7 @@ export const Sidebar = ({ currentTab, setCurrentTab }) => {
       { id: "dashboard", label: "Admin Dashboard", icon: LayoutDashboard },
       { id: "queue-monitor", label: "Operational Queue", icon: Ticket },
       { id: "batch-capacity", label: "Batch & Capacity Config", icon: Layers },
-      { id: "history", label: "Audit Logs & History", icon: History },
+      { id: "history", label: "Audit History", icon: History },
       { id: "settings", label: "Centre Settings", icon: Settings },
     ];
   } else {
@@ -110,13 +110,6 @@ export const Sidebar = ({ currentTab, setCurrentTab }) => {
           );
         })}
       </nav>
-
-      {/* Footer Info */}
-      <div className="p-4 border-t border-[#1A3A73] text-[11px] text-blue-200/80 text-center font-medium bg-[#091C3E]">
-        Department of Agricultural Marketing
-        <br />
-        Government of Maharashtra
-      </div>
     </aside>
   );
 };

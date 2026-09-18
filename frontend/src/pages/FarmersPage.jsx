@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useApp } from "../context/AppContext";
 import { StatusBadge } from "../components/common/Badge";
+import { getDisplaySlot } from "../utils/queueUtils";
 import { Search, ArrowRight, ShieldCheck } from "lucide-react";
 
 export const FarmersPage = ({ onOpenFarmerDetails }) => {
@@ -47,7 +48,6 @@ export const FarmersPage = ({ onOpenFarmerDetails }) => {
             <option value="ARRIVED">ARRIVED</option>
             <option value="WEIGHING">WEIGHING</option>
             <option value="QUALITY">QUALITY</option>
-            <option value="PROCUREMENT">PROCUREMENT</option>
             <option value="PAYMENT">PAYMENT</option>
             <option value="FLAGGED">FLAGGED</option>
             <option value="LATE">LATE</option>
@@ -76,7 +76,7 @@ export const FarmersPage = ({ onOpenFarmerDetails }) => {
                 <th className="px-6 py-3.5">Farmer Name</th>
                 <th className="px-6 py-3.5">Phone Number</th>
                 <th className="px-6 py-3.5">Crop Commodity</th>
-                <th className="px-6 py-3.5">Slot & Batch</th>
+                <th className="px-6 py-3.5">Slot</th>
                 <th className="px-6 py-3.5">Booked Qty</th>
                 <th className="px-6 py-3.5">Current Status</th>
                 <th className="px-6 py-3.5 text-right">Actions</th>
@@ -103,8 +103,8 @@ export const FarmersPage = ({ onOpenFarmerDetails }) => {
                     </td>
                     <td className="px-6 py-4 font-mono">{f.phone}</td>
                     <td className="px-6 py-4 font-medium text-slate-700">{f.crop || f.commodity || "Crop"}</td>
-                    <td className="px-6 py-4 text-slate-600">
-                      {f.slot} • {f.batch}
+                    <td className="px-6 py-4 text-slate-600 font-semibold">
+                      {getDisplaySlot(f)}
                     </td>
                     <td className="px-6 py-4 font-semibold text-slate-800">
                       {f.expectedQuantityQuintals} Q

@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   PhoneCall,
   User,
+  Building2,
 } from "lucide-react";
 
 export const Header = ({ onOpenLogin, onViewLandingPage }) => {
@@ -42,42 +43,29 @@ export const Header = ({ onOpenLogin, onViewLandingPage }) => {
       <div className="px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4">
         {/* Left Branding */}
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-full bg-white border-2 border-amber-400 flex items-center justify-center shadow-md shrink-0">
-            <Landmark className="w-6 h-6 text-[#0F2B5C]" />
+          <div className="w-11 h-11 rounded-full bg-white border-2 border-amber-400 flex items-center justify-center shadow-md shrink-0 overflow-hidden">
+            <img src="/Weblogo.png" alt="SAMARTH Logo" className="w-full h-full object-cover rounded-full" />
           </div>
 
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-base sm:text-lg font-black tracking-tight text-white leading-tight">
-                SmartProcure Admin Portal
+                SAMARTH
               </h1>
-              
-
             </div>
-            <p className="text-xs text-blue-200 font-medium tracking-wide">
-              Department of Agricultural Marketing — Government Procurement Portal
+            <p className="text-[10px] font-semibold text-amber-300/90 leading-none mt-0.5">
+              Smart Agricultural Management & Resource Tracking Hub
             </p>
           </div>
         </div>
 
         {/* Right Telemetry & Auth Status */}
         <div className="flex items-center gap-3">
-          {onViewLandingPage && (
-            <button
-              onClick={onViewLandingPage}
-              className="bg-[#162C5B] hover:bg-[#1C3B7A] text-amber-300 px-3.5 py-1.5 rounded-full border border-amber-400/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
-            >
-              <Landmark className="w-3.5 h-3.5 text-amber-400" />
-              <span>ANNA SETU Public Home</span>
-            </button>
-          )}
-
-          <div className="hidden xl:flex items-center gap-2 text-xs">
-            <div className="flex items-center gap-1.5 bg-[#091C3E] px-3 py-1.5 rounded-full border border-emerald-500/40 text-emerald-400 font-bold">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>MSP Active</span>
+          <div className="flex items-center gap-2 text-xs">
+            <div className="flex items-center gap-1.5 bg-[#162C5B] px-3 py-1.5 rounded-full border border-amber-400/30 text-amber-300 font-bold">
+              <Building2 className="w-3.5 h-3.5 text-amber-400" />
+              <span>Turbhe Centre</span>
             </div>
-
             <div className="flex items-center gap-1.5 bg-[#162C5B] px-3 py-1.5 rounded-full border border-blue-400/20 text-slate-200 font-mono font-bold text-amber-300">
               <Clock className="w-3.5 h-3.5 text-amber-400" />
               <span>{timeStr}</span>

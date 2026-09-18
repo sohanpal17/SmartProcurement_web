@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useApp } from "../context/AppContext";
-import { TokenCard } from "../components/tokens/TokenCard";
-import { filterTokensByTab } from "../utils/queueUtils";
-import { Search, Ticket } from "lucide-react";
+import { STAGE_LABELS, filterTokensByTab, getDisplaySlot } from "../utils/queueUtils";
+import { Search, Ticket, ArrowRight, Calendar, Clock } from "lucide-react";
 
 export const QueueMonitorPage = ({ onOpenReschedule, onOpenFlag, onOpenFarmerDetails }) => {
   const { farmers } = useApp();
@@ -48,10 +47,43 @@ export const QueueMonitorPage = ({ onOpenReschedule, onOpenFlag, onOpenFarmerDet
       (f) =>
         f.tokenNumber.toLowerCase().includes(q) ||
         f.farmerName.toLowerCase().includes(q) ||
-        f.phone.includes(q) ||
-        f.crop.toLowerCase().includes(q)
+        (f.phone && f.phone.includes(q)) ||
+        (f.crop && f.crop.toLowerCase().includes(q))
     );
   }
+
+  const getFormattedDate = (farmer) => {
+    const dStr = farmer.date || farmer.created_at || (farmer.history && farmer.history[0]?.timestamp);
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, "0");
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const year = now.getFullYear();
+    const todayFormatted = `${day}/${month}/${year}`;
+
+    if (!dStr) return todayFormatted;
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dStr)) return dStr;
+    const parsed = new Date(dStr);
+    if (!isNaN(parsed.getTime())) {
+      const pDay = String(parsed.getDate()).padStart(2, "0");
+      const pMonth = String(parsed.getMonth() + 1).padStart(2, "0");
+      const pYear = parsed.getFullYear();
+      return `${pDay}/${pMonth}/${pYear}`;
+    }
+    return todayFormatted;
+  };
+
+  const getFormattedTime = (farmer) => {
+    if (farmer.history && farmer.history.length > 0 && farmer.history[0].timestamp) {
+      const ts = farmer.history[0].timestamp;
+      if (ts.includes("AM") || ts.includes("PM") || ts.includes(":")) {
+        return ts;
+      }
+    }
+    if (farmer.batch) {
+      return farmer.batch.split("–")[0].trim();
+    }
+    return "08:00 AM";
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -69,7 +101,7 @@ export const QueueMonitorPage = ({ onOpenReschedule, onOpenFlag, onOpenFarmerDet
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search Token #, Farmer Name, Phone..."
+            placeholder="Search Token #, Farmer Name..."
             className="w-full pl-9 pr-4 py-2 bg-white rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-[#0F2B5C] shadow-xs font-medium"
           />
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -82,7 +114,7 @@ export const QueueMonitorPage = ({ onOpenReschedule, onOpenFlag, onOpenFarmerDet
           onClick={() => setActiveTab("arrival")}
           className="bg-blue-50 border border-blue-200 p-4 rounded-xl cursor-pointer hover:shadow-sm transition-all"
         >
-          <span className="text-xs font-bold text-blue-900 block uppercase">Arrival Gate Line</span>
+          <span className="text-xs font-bold text-blue-900 block uppercase">Check-in / Arrival Line</span>
           <span className="text-2xl font-black text-blue-950 block mt-1 font-mono">{arrivalLineCount}</span>
           <span className="text-[11px] text-blue-700 font-medium">Farmers Arrived</span>
         </div>
@@ -92,7 +124,7 @@ export const QueueMonitorPage = ({ onOpenReschedule, onOpenFlag, onOpenFarmerDet
         >
           <span className="text-xs font-bold text-indigo-900 block uppercase">Weighing Line</span>
           <span className="text-2xl font-black text-indigo-950 block mt-1 font-mono">{weighingLineCount}</span>
-          <span className="text-[11px] text-indigo-700 font-medium">Awaiting Weighbridge</span>
+          <span className="text-[11px] text-indigo-700 font-medium">Awaiting Weighing</span>
         </div>
         <div
           onClick={() => setActiveTab("quality")}
@@ -108,7 +140,7 @@ export const QueueMonitorPage = ({ onOpenReschedule, onOpenFlag, onOpenFarmerDet
         >
           <span className="text-xs font-bold text-emerald-900 block uppercase">Payment Line</span>
           <span className="text-2xl font-black text-emerald-950 block mt-1 font-mono">{paymentLineCount}</span>
-          <span className="text-[11px] text-emerald-700 font-medium">Awaiting Payout</span>
+          <span className="text-[11px] text-emerald-700 font-medium">Awaiting Payment</span>
         </div>
       </div>
 
@@ -120,29 +152,31 @@ export const QueueMonitorPage = ({ onOpenReschedule, onOpenFlag, onOpenFarmerDet
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700">
-            <span>📅 Date:</span>
+          <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700">
+            <Calendar className="w-3.5 h-3.5 text-slate-500" />
+            <span>Date:</span>
             <select
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               className="bg-transparent text-[#0F2B5C] font-extrabold focus:outline-none cursor-pointer"
             >
-              <option value="Today">Today (13 Sep 2026)</option>
+              <option value="Today">Today</option>
               <option value="Tomorrow">Tomorrow</option>
             </select>
           </div>
 
-          <div className="flex items-center gap-1 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700">
-            <span>🕒 Batch:</span>
+          <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700">
+            <Clock className="w-3.5 h-3.5 text-slate-500" />
+            <span>Slot:</span>
             <select
               value={selectedBatch}
               onChange={(e) => setSelectedBatch(e.target.value)}
               className="bg-transparent text-[#0F2B5C] font-extrabold focus:outline-none cursor-pointer"
             >
-              <option value="All">All Batches</option>
-              <option value="Batch 1">Batch 1 (07:00 - 08:00)</option>
-              <option value="Batch 2">Batch 2 (08:00 - 09:00)</option>
-              <option value="Batch 3">Batch 3 (09:00 - 10:00)</option>
+              <option value="All">All Slots</option>
+              <option value="Morning">Morning</option>
+              <option value="Afternoon">Afternoon</option>
+              <option value="Evening">Evening</option>
             </select>
           </div>
         </div>
@@ -152,7 +186,7 @@ export const QueueMonitorPage = ({ onOpenReschedule, onOpenFlag, onOpenFarmerDet
       <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200">
         {[
           { id: "all", label: "All Tokens", count: farmers.length },
-          { id: "arrival", label: "Arrival Line", count: arrivalLineCount },
+          { id: "arrival", label: "Check-in Line", count: arrivalLineCount },
           { id: "weighing", label: "Weighing Line", count: weighingLineCount },
           { id: "quality", label: "Quality Check Line", count: qualityLineCount },
           { id: "payment", label: "Payment Line", count: paymentLineCount },
@@ -173,23 +207,79 @@ export const QueueMonitorPage = ({ onOpenReschedule, onOpenFlag, onOpenFarmerDet
         ))}
       </div>
 
-      {/* Queue List */}
-      <div className="grid grid-cols-1 gap-4">
-        {filtered.length === 0 ? (
-          <div className="p-12 rounded-2xl bg-white border border-slate-200 text-center text-slate-400">
-            No tokens match your search or filter criteria.
-          </div>
-        ) : (
-          filtered.map((farmer) => (
-            <TokenCard
-              key={farmer.id}
-              farmer={farmer}
-              onOpenReschedule={onOpenReschedule}
-              onOpenFlag={onOpenFlag}
-              onOpenFarmerDetails={onOpenFarmerDetails}
-            />
-          ))
-        )}
+      {/* Centre Administrator Operational Queue Table */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs text-slate-600">
+            <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200">
+              <tr>
+                <th className="px-6 py-3.5">Token No.</th>
+                <th className="px-6 py-3.5">Farmer Name</th>
+                <th className="px-6 py-3.5">Date</th>
+                <th className="px-6 py-3.5">Slot</th>
+                <th className="px-6 py-3.5">Current Process</th>
+                <th className="px-6 py-3.5">Status</th>
+                <th className="px-6 py-3.5 text-right">Info</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-10 text-center text-slate-400">
+                    No tokens match your search or filter criteria.
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((farmer) => {
+                  const currentProcessLabel = STAGE_LABELS[farmer.currentStage] || farmer.currentStage;
+                  const isFlagged = farmer.status === "FLAGGED";
+                  const isCompleted = farmer.status === "COMPLETED";
+                  
+                  const statusText = isFlagged ? "Flagged" : (isCompleted ? "Completed" : "In Process");
+                  const statusStyle = isFlagged
+                    ? "bg-rose-100 text-rose-800 border-rose-200"
+                    : (isCompleted
+                        ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                        : "bg-blue-50 text-[#102A56] border-blue-200");
+
+                  return (
+                    <tr key={farmer.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="px-6 py-4 font-mono font-bold text-[#102A56] text-sm">
+                        {farmer.tokenNumber || farmer.token_number || `TBR-${farmer.id}`}
+                      </td>
+                      <td className="px-6 py-4 font-bold text-slate-900 text-sm">
+                        {farmer.farmerName}
+                      </td>
+                      <td className="px-6 py-4 font-mono text-slate-700 font-semibold">
+                        {getFormattedDate(farmer)}
+                      </td>
+                      <td className="px-6 py-4 font-semibold text-slate-700">
+                        {getDisplaySlot(farmer)}
+                      </td>
+                      <td className="px-6 py-4 text-slate-700 font-semibold">
+                        {currentProcessLabel}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${statusStyle}`}>
+                          {statusText}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          onClick={() => onOpenFarmerDetails(farmer.id)}
+                          className="text-[#2563EB] hover:underline font-semibold text-xs inline-flex items-center gap-1 cursor-pointer"
+                        >
+                          <span>View Info</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

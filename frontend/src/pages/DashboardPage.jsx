@@ -5,7 +5,7 @@ import { AdminDashboard } from "../components/dashboard/AdminDashboard";
 import { ArrivalDashboard } from "../components/dashboard/ArrivalDashboard";
 import { OfficerStageDashboard } from "../components/dashboard/OfficerStageDashboard";
 
-export const DashboardPage = ({ onNavigateTab, onOpenReschedule, onOpenFlag, onOpenFarmerDetails }) => {
+export const DashboardPage = ({ onNavigateTab, onOpenReschedule, onOpenFlag, onOpenFarmerDetails, onOpenStageModal }) => {
   const { currentDemoRole } = useApp();
 
   if (currentDemoRole === ROLES.ADMIN) {
@@ -21,7 +21,9 @@ export const DashboardPage = ({ onNavigateTab, onOpenReschedule, onOpenFlag, onO
     return (
       <ArrivalDashboard
         onOpenReschedule={onOpenReschedule}
+        onOpenFlag={onOpenFlag}
         onOpenFarmerDetails={onOpenFarmerDetails}
+        onOpenStageModal={onOpenStageModal}
       />
     );
   }
@@ -30,6 +32,7 @@ export const DashboardPage = ({ onNavigateTab, onOpenReschedule, onOpenFlag, onO
     <OfficerStageDashboard
       onOpenFlag={onOpenFlag}
       onOpenFarmerDetails={onOpenFarmerDetails}
+      onOpenStageModal={onOpenStageModal}
     />
   );
 };

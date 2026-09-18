@@ -22,7 +22,7 @@ export const AppProvider = ({ children }) => {
   const [centres, setCentres] = useState(INITIAL_CENTRES);
   const [selectedCentreId, setSelectedCentreId] = useState("MH-NMB-01");
   const [selectedDistrict, setSelectedDistrict] = useState("All");
-  const [farmers, setFarmers] = useState([]);
+  const [farmers, setFarmers] = useState(INITIAL_FARMERS);
   const [officers, setOfficers] = useState([]);
   const [slotConfig, setSlotConfig] = useState(DEFAULT_SLOT_CONFIG);
   const [mandiInfo, setMandiInfo] = useState(MANDI_INFO);
@@ -34,8 +34,8 @@ export const AppProvider = ({ children }) => {
     const newCentre = {
       id: `MH-${(newCentreData.district || "APMC").substring(0, 3).toUpperCase()}-${String(centres.length + 1).padStart(2, "0")}`,
       ...newCentreData,
-      dailyCapacity: Number(newCentreData.dailyCapacity || 100),
-      batchCapacity: Number(newCentreData.batchCapacity || 25),
+      dailyCapacity: Number(newCentreData.dailyCapacity || 90),
+      batchCapacity: Number(newCentreData.batchCapacity || 30),
       activeStaffCount: 8,
     };
     setCentres((prev) => [newCentre, ...prev]);
@@ -100,7 +100,7 @@ export const AppProvider = ({ children }) => {
     const rawName = email ? email.split("@")[0].replace(/[^a-zA-Z]/g, " ").trim() : "Centre Official";
     const formattedName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
     const finalName = targetRole === ROLES.ADMIN
-      ? "Rajeshwar Patil"
+      ? "Suresh Jagdale"
       : `${formattedName || "Official"} (${targetRole})`;
 
     const fallbackUser = {
@@ -189,18 +189,26 @@ export const AppProvider = ({ children }) => {
                 (f) => f.tokenNumber === q.token_number || f.id === q.id || f.id === q.booking_id
               );
 
-              const stageNames = ["arrival", "weighing", "quality", "procurement", "payment"];
+              const stageNames = ["arrival", "weighing", "quality", "payment"];
               
               let localStageIndex = 1;
               if (existing) {
                 const idx = stageNames.indexOf(existing.currentStage);
-                localStageIndex = existing.status === "COMPLETED" ? 6 : (idx >= 0 ? idx + 1 : 1);
+                localStageIndex = existing.status === "COMPLETED" ? 5 : (idx >= 0 ? idx + 1 : 1);
               }
 
               const effectiveStage = Math.max(q.current_stage || 1, localStageIndex);
-              const currentStageKey = stageNames[Math.min(effectiveStage - 1, 4)];
+              const currentStageKey = stageNames[Math.min(effectiveStage - 1, 3)];
 
-              let statusStr = effectiveStage === 6 ? "COMPLETED" : currentStageKey.toUpperCase();
+              let statusStr = "BOOKED";
+              if (effectiveStage === 5) {
+                statusStr = "COMPLETED";
+              } else if (effectiveStage === 1) {
+                statusStr = (existing && existing.status === "ARRIVED") ? "ARRIVED" : "BOOKED";
+              } else {
+                statusStr = currentStageKey.toUpperCase();
+              }
+
               if (existing && (existing.status === "LATE" || existing.status === "FLAGGED") && effectiveStage === localStageIndex) {
                 statusStr = existing.status;
               }
@@ -218,9 +226,8 @@ export const AppProvider = ({ children }) => {
                 measuredWeightQuintals: existing?.measuredWeightQuintals || null,
                 qualityGrade: existing?.qualityGrade || null,
                 procurementRatePerQuintal: existing?.procurementRatePerQuintal || null,
-                transactionRef: existing?.transactionRef || null,
-                slot: existing?.slot || "Morning",
-                batch: b.time_range || existing?.batch || "07:00 AM – 08:00 AM",
+                slot: existing?.slot || (b.time_range?.toLowerCase().includes("12:") || b.time_range?.toLowerCase().includes("afternoon") ? "Afternoon" : b.time_range?.toLowerCase().includes("05:") || b.time_range?.toLowerCase().includes("evening") ? "Evening" : "Morning"),
+                batch: b.time_range || existing?.batch || "07:00 AM – 10:00 AM",
                 status: statusStr,
                 arrivalStatus: effectiveStage > 1 ? "ARRIVED" : (existing?.arrivalStatus || "BOOKED"),
                 currentStage: currentStageKey,
@@ -230,8 +237,7 @@ export const AppProvider = ({ children }) => {
                   arrival: { status: effectiveStage > 1 ? "COMPLETED" : "ACTIVE", ...existing?.stages?.arrival },
                   weighing: { status: effectiveStage > 2 ? "COMPLETED" : effectiveStage === 2 ? "ACTIVE" : "LOCKED", ...existing?.stages?.weighing },
                   quality: { status: effectiveStage > 3 ? "COMPLETED" : effectiveStage === 3 ? "ACTIVE" : "LOCKED", ...existing?.stages?.quality },
-                  procurement: { status: effectiveStage > 4 ? "COMPLETED" : effectiveStage === 4 ? "ACTIVE" : "LOCKED", ...existing?.stages?.procurement },
-                  payment: { status: effectiveStage > 5 ? "COMPLETED" : effectiveStage === 5 ? "ACTIVE" : "LOCKED", ...existing?.stages?.payment },
+                  payment: { status: effectiveStage > 4 ? "COMPLETED" : effectiveStage === 4 ? "ACTIVE" : "LOCKED", ...existing?.stages?.payment },
                 },
                 flags: existing?.flags || [],
                 history: existing?.history || [{ timestamp: new Date(q.updated_at).toLocaleTimeString(), event: "Token Synced from Backend", actor: "System" }],
@@ -522,7 +528,7 @@ export const AppProvider = ({ children }) => {
   const completeStage = (farmerId, stageKey, payload = {}) => {
     let targetTokenNumber = null;
     let newStageNum = 2;
-    const stageIndexMap = { arrival: 2, weighing: 3, quality: 4, procurement: 5, payment: 6 };
+    const stageIndexMap = { arrival: 2, weighing: 3, quality: 4, payment: 5 };
 
     setFarmers((prev) =>
       prev.map((f) => {
@@ -566,8 +572,6 @@ export const AppProvider = ({ children }) => {
             detailStr = ` (Weight: ${payload.measuredWeightQuintals} Quintal)`;
           } else if (stageKey === "quality" && payload.qualityGrade) {
             detailStr = ` (Grade: ${payload.qualityGrade})`;
-          } else if (stageKey === "procurement" && payload.procurementRatePerQuintal) {
-            detailStr = ` (Rate: ₹${payload.procurementRatePerQuintal}/Q)`;
           } else if (stageKey === "payment" && payload.transactionRef) {
             detailStr = ` (Txn Ref: ${payload.transactionRef})`;
           }
@@ -601,10 +605,53 @@ export const AppProvider = ({ children }) => {
     }
 
     if (stageKey === "payment") {
-      addToast(`Payment & Procurement Completed for Token ${target?.tokenNumber}! Token moved to History.`, "success");
+      addToast(`Payment Completed for Token ${target?.tokenNumber}! Token moved to History.`, "success");
     } else {
       addToast(`${STAGE_LABELS[stageKey]} completed for Token ${target?.tokenNumber}`, "success");
     }
+  };
+
+  // Update existing stage data before next officer advances token
+  const updateStageData = (farmerId, stageKey, payload = {}) => {
+    setFarmers((prev) =>
+      prev.map((f) => {
+        if (f.id === farmerId) {
+          const timestamp = getNowFormatted();
+          const nextStages = { ...f.stages };
+
+          nextStages[stageKey] = {
+            ...nextStages[stageKey],
+            ...payload,
+            updatedAt: timestamp,
+          };
+
+          let detailStr = "";
+          if (stageKey === "weighing" && payload.measuredWeightQuintals !== undefined) {
+            detailStr = ` (Updated Weight: ${payload.measuredWeightQuintals} Quintals)`;
+          } else if (stageKey === "quality" && payload.qualityGrade) {
+            detailStr = ` (Updated Grade: ${payload.qualityGrade})`;
+          } else if (stageKey === "payment" && payload.transactionRef) {
+            detailStr = ` (Updated Txn Ref: ${payload.transactionRef})`;
+          }
+
+          return {
+            ...f,
+            ...payload,
+            stages: nextStages,
+            history: [
+              ...f.history,
+              {
+                timestamp,
+                event: `${STAGE_LABELS[stageKey]} Data Edited${detailStr}`,
+                actor: currentDemoRole,
+              },
+            ],
+          };
+        }
+        return f;
+      })
+    );
+    addToast(`Updated ${STAGE_LABELS[stageKey]} data for token`, "info");
   };
 
   // Workflow Flagging
@@ -796,6 +843,7 @@ export const AppProvider = ({ children }) => {
         rescheduleToken,
         cancelBooking,
         completeStage,
+        updateStageData,
         confirmWeighing,
         confirmQuality,
         confirmProcurement,

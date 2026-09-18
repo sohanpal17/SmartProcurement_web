@@ -4,10 +4,10 @@ import { StageBadge, StatusBadge } from "../common/Badge";
 import { TokenStepper } from "./TokenStepper";
 import { ROLES } from "../../data/mockData";
 import { getStageOfficerRole } from "../../utils/permissions";
-import { STAGE_LABELS } from "../../utils/queueUtils";
-import { CheckCircle2, AlertTriangle, ArrowRight, ShieldCheck, MapPin } from "lucide-react";
+import { STAGE_LABELS, getDisplaySlot } from "../../utils/queueUtils";
+import { CheckCircle2, AlertTriangle, ArrowRight, ShieldCheck, MapPin, Edit3 } from "lucide-react";
 
-export const TokenCard = ({ farmer, onOpenReschedule, onOpenFlag, onOpenFarmerDetails }) => {
+export const TokenCard = ({ farmer, onOpenReschedule, onOpenFlag, onOpenFarmerDetails, onOpenStageModal }) => {
   const {
     currentDemoRole,
     markArrived,
@@ -40,8 +40,25 @@ export const TokenCard = ({ farmer, onOpenReschedule, onOpenFlag, onOpenFarmerDe
     farmer.status !== "FLAGGED";
 
   const canArrivalManage =
-    (currentDemoRole === ROLES.ADMIN || normRole.includes("arrival") || normRole.includes("admin")) &&
+    (currentDemoRole === ROLES.ADMIN ||
+      normRole.includes("arrival") ||
+      normRole.includes("check") ||
+      normRole.includes("admin")) &&
     farmer.status !== "COMPLETED";
+
+  // Determine if the current officer completed their stage BUT the next officer hasn't ticked it yet
+  // Edit option is ONLY for Weighing Staff and Quality Staff
+  let myStageKey = null;
+  if (normRole.includes("weigh")) myStageKey = "weighing";
+  else if (normRole.includes("quality")) myStageKey = "quality";
+
+  const nextStageMap = { weighing: "quality", quality: "payment" };
+  const nextStageKey = myStageKey ? nextStageMap[myStageKey] : null;
+
+  const isMyStageCompleted = myStageKey && farmer.stages?.[myStageKey]?.status === "COMPLETED";
+  const isNextStageCompleted = nextStageKey ? farmer.stages?.[nextStageKey]?.status === "COMPLETED" : false;
+
+  const canEditMyStage = myStageKey && isMyStageCompleted && !isNextStageCompleted && farmer.status !== "FLAGGED";
 
   return (
     <div
@@ -68,15 +85,8 @@ export const TokenCard = ({ farmer, onOpenReschedule, onOpenFlag, onOpenFarmerDe
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> Verified
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-slate-600 font-medium flex flex-wrap items-center gap-2 mt-0.5">
-              <span className="flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                <span>{farmer.location || "Navi Mumbai"}</span>
-              </span>
-              <span>•</span>
-              <span>{farmer.slot} ({farmer.batch})</span>
-              <span>•</span>
-              <span className="font-semibold text-slate-800">{farmer.crop || farmer.commodity || "Crop"}</span>
+            <p className="text-xs sm:text-sm text-slate-600 font-medium flex items-center gap-2 mt-0.5">
+              <span>Slot: <strong>{getDisplaySlot(farmer)}</strong></span>
             </p>
           </div>
         </div>
@@ -107,127 +117,59 @@ export const TokenCard = ({ farmer, onOpenReschedule, onOpenFlag, onOpenFarmerDe
         </div>
       )}
 
-      {/* Metric Breakdown Row: Clear Readable Sizing */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs sm:text-sm bg-slate-50/80 p-4 rounded-xl border border-slate-200/80 my-3">
-        <div>
-          <span className="text-slate-500 block text-xs font-medium">Phone Contact</span>
-          <span className="font-bold text-slate-900 font-mono text-sm sm:text-base">{farmer.phone}</span>
-        </div>
-        <div>
-          <span className="text-slate-500 block text-xs font-medium">Registered Quantity</span>
-          <span className="font-bold text-slate-900 text-sm sm:text-base">{farmer.expectedQuantityQuintals} Quintals</span>
-        </div>
-        <div>
-          <span className="text-slate-500 block text-xs font-medium">Weighbridge Weight</span>
-          <span className="font-bold text-slate-900 text-sm sm:text-base">
-            {farmer.measuredWeightQuintals ? `${farmer.measuredWeightQuintals} Quintals` : "Pending"}
-          </span>
-        </div>
-        <div>
-          <span className="text-slate-500 block text-xs font-medium">Quality Verification</span>
-          <span className="font-bold text-slate-900 text-sm sm:text-base">
-            {farmer.qualityGrade || "Pending check"}
-          </span>
-        </div>
-      </div>
-
       {/* Action Footer Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-        <button
-          onClick={() => onOpenFarmerDetails(farmer.id)}
-          className="text-xs sm:text-sm text-[#102A56] hover:text-blue-700 font-semibold flex items-center gap-1.5 cursor-pointer"
-        >
-          <span>View Full Profile & History</span>
-          <ArrowRight className="w-3.5 h-3.5" />
-        </button>
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 mt-2">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => onOpenFarmerDetails(farmer.id)}
+            className="text-xs sm:text-sm text-[#102A56] hover:text-blue-700 font-semibold flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>View Full Profile & History</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
 
-        <div className="flex items-center gap-2">
-          {canArrivalManage && (
-            <>
-              {farmer.arrivalStatus === "BOOKED" && (
-                <button
-                  onClick={() => markArrived(farmer.id)}
-                  className="px-4 py-2 bg-[#2563EB] hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer"
-                >
-                  Mark Arrived
-                </button>
-              )}
-
-              {farmer.status === "ARRIVED" && (
-                <button
-                  onClick={() => callNextToken(farmer.id)}
-                  className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer"
-                >
-                  Call Token
-                </button>
-              )}
-
-              {(farmer.status === "BOOKED" || farmer.status === "LATE") && (
-                <>
-                  <button
-                    onClick={() => markLate(farmer.id)}
-                    className="px-3.5 py-2 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs sm:text-sm font-semibold border border-amber-300 cursor-pointer"
-                  >
-                    Mark Late
-                  </button>
-                  <button
-                    onClick={() => onOpenReschedule(farmer)}
-                    className="px-4 py-2 bg-[#102A56] hover:bg-[#16376c] text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs cursor-pointer"
-                  >
-                    Reschedule
-                  </button>
-                  <button
-                    onClick={() => cancelBooking(farmer.id)}
-                    className="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs sm:text-sm font-semibold border border-rose-200 cursor-pointer"
-                  >
-                    Cancel Booking
-                  </button>
-                </>
-              )}
-            </>
-          )}
-
-          {/* Processing Officer Specific Action */}
-          {isMyActionableStage && farmer.status !== "FLAGGED" && (
-            <div className="flex items-center gap-2 bg-emerald-50 p-2 rounded-xl border border-emerald-200">
-              <span className="text-xs sm:text-sm font-bold text-emerald-900 px-1.5 uppercase tracking-wider">
-                STAGE ACTION:
-              </span>
-
-              <button
-                onClick={() => onOpenFlag(farmer, currentStageKey)}
-                className="px-3.5 py-2 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg text-xs sm:text-sm font-bold border border-rose-300 transition-all flex items-center gap-1.5 cursor-pointer"
-              >
-                <AlertTriangle className="w-4 h-4 text-rose-600" />
-                <span>Flag Issue</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  if (currentStageKey === "weighing") {
-                    const w = prompt("Enter measured weight in Quintals:", farmer.expectedQuantityQuintals);
-                    if (w) completeStage(farmer.id, "weighing", { measuredWeightQuintals: parseFloat(w) });
-                  } else if (currentStageKey === "quality") {
-                    const g = prompt("Enter Quality Grade (e.g., Grade A, Grade B):", "Grade A");
-                    if (g) completeStage(farmer.id, "quality", { qualityGrade: g });
-                  } else if (currentStageKey === "procurement") {
-                    const r = prompt("Enter Procurement Rate per Quintal (INR):", farmer.procurementRatePerQuintal || 2275);
-                    if (r) completeStage(farmer.id, "procurement", { procurementRatePerQuintal: parseFloat(r) });
-                  } else if (currentStageKey === "payment") {
-                    const ref = `DBT-2026-${Math.floor(10000 + Math.random() * 90000)}`;
-                    completeStage(farmer.id, "payment", { transactionRef: ref, totalAmountPaid: (farmer.measuredWeightQuintals || farmer.expectedQuantityQuintals) * (farmer.procurementRatePerQuintal || 2275) });
-                  } else {
-                    completeStage(farmer.id, currentStageKey);
-                  }
-                }}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs sm:text-sm font-bold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
-              >
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Complete {STAGE_LABELS[currentStageKey]}</span>
-              </button>
-            </div>
+          {/* Edit Option if completed by current officer but NOT yet ticked by next officer */}
+          {canEditMyStage && (
+            <button
+              onClick={() => onOpenStageModal && onOpenStageModal(farmer, myStageKey, true)}
+              className="px-3.5 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg text-xs font-bold border border-amber-300 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+            >
+              <Edit3 className="w-3.5 h-3.5 text-amber-700" />
+              <span>Edit {STAGE_LABELS[myStageKey]} Data</span>
+            </button>
           )}
         </div>
+
+        {/* Processing Officer Specific Action */}
+        {isMyActionableStage && farmer.status !== "FLAGGED" && (
+          <div className="flex items-center gap-2 bg-emerald-50 p-2 rounded-xl border border-emerald-200">
+            <span className="text-xs sm:text-sm font-bold text-emerald-900 px-1.5 uppercase tracking-wider">
+              STAGE ACTION:
+            </span>
+
+            <button
+              onClick={() => onOpenFlag(farmer, currentStageKey)}
+              className="px-3.5 py-2 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg text-xs sm:text-sm font-bold border border-rose-300 transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <AlertTriangle className="w-4 h-4 text-rose-600" />
+              <span>Flag Issue</span>
+            </button>
+
+            <button
+              onClick={() => {
+                if (onOpenStageModal) {
+                  onOpenStageModal(farmer, currentStageKey, false);
+                } else {
+                  completeStage(farmer.id, currentStageKey);
+                }
+              }}
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs sm:text-sm font-bold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Complete {STAGE_LABELS[currentStageKey]}</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

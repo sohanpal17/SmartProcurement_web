@@ -67,7 +67,7 @@ export const TokenStepper = ({ farmer }) => {
           else if (isFlagged) labelClasses = "text-rose-700 font-bold";
 
           return (
-            <div key={stageKey} className="w-1/5 px-1 flex flex-col items-center">
+            <div key={stageKey} className="w-1/4 px-1 flex flex-col items-center">
               <p className={`text-xs sm:text-sm leading-tight ${labelClasses}`}>
                 {STAGE_LABELS[stageKey]}
               </p>

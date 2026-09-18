@@ -66,24 +66,6 @@ export const FarmerDetailsDrawer = ({ farmerId, onClose }) => {
               <span className="text-slate-500 block text-[11px]">Booked Quantity</span>
               <span className="font-bold text-slate-900 text-sm">{farmer.expectedQuantityQuintals} Quintals</span>
             </div>
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-              <span className="text-slate-500 block text-[11px]">Measured Weight</span>
-              <span className="font-bold text-slate-900 text-sm">
-                {farmer.measuredWeightQuintals ? `${farmer.measuredWeightQuintals} Quintals` : "Pending"}
-              </span>
-            </div>
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-              <span className="text-slate-500 block text-[11px]">Quality Grade</span>
-              <span className="font-bold text-slate-900 text-sm">
-                {farmer.qualityGrade || "Pending check"}
-              </span>
-            </div>
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-              <span className="text-slate-500 block text-[11px]">Total Payout</span>
-              <span className="font-bold text-emerald-700 text-sm">
-                {farmer.totalAmountPaid ? `INR ${farmer.totalAmountPaid.toLocaleString("en-IN")}` : "Pending"}
-              </span>
-            </div>
           </div>
 
           {/* Stage Audit Breakdown */}
@@ -155,30 +137,7 @@ export const FarmerDetailsDrawer = ({ farmerId, onClose }) => {
             </div>
           )}
 
-          {/* Audit Event Log */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
-            <h3 className="text-sm font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-[#102A56]" />
-              <span>Audit Event Log</span>
-            </h3>
-            <div className="relative pl-6 space-y-4 border-l-2 border-slate-200 ml-2 text-xs">
-              {farmer.history && farmer.history.length > 0 ? (
-                farmer.history.map((item, idx) => (
-                  <div key={idx} className="relative">
-                    <div className="absolute -left-[31px] top-0 w-3.5 h-3.5 rounded-full bg-[#102A56] border-2 border-white"></div>
-                    <p className="font-bold text-slate-900">{item.event}</p>
-                    <div className="flex items-center gap-3 text-slate-500 mt-0.5 text-[11px]">
-                      <span>{item.timestamp}</span>
-                      <span>•</span>
-                      <span>{item.actor}</span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-slate-400">No audit events recorded yet.</p>
-              )}
-            </div>
-          </div>
+          {/* End of details */}
         </div>
       </div>
     </div>

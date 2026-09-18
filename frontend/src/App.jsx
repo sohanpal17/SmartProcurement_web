@@ -4,6 +4,7 @@ import { Header } from "./components/layout/Header";
 import { Sidebar } from "./components/layout/Sidebar";
 import { ToastContainer } from "./components/common/ToastContainer";
 import { FarmerDetailsDrawer } from "./components/common/FarmerDetailsDrawer";
+import { StageInputModal } from "./components/common/StageInputModal";
 
 import { DashboardPage } from "./pages/DashboardPage";
 import { QueueMonitorPage } from "./pages/QueueMonitorPage";
@@ -24,12 +25,13 @@ import { ROLES } from "./data/mockData";
 import { LandingPage } from "./pages/LandingPage";
 
 function MainLayout() {
-  const { authUser, currentDemoRole, selectedFarmerId, setSelectedFarmerId } = useApp();
+  const { authUser, currentDemoRole, selectedFarmerId, setSelectedFarmerId, completeStage, updateStageData } = useApp();
   const [viewMode, setViewMode] = useState(() => (authUser ? "dashboard" : "landing"));
   const [currentTab, setCurrentTab] = useState("dashboard");
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [rescheduleFarmer, setRescheduleFarmer] = useState(null);
   const [flagTarget, setFlagTarget] = useState(null); // { farmer, stageKey }
+  const [stageModalTarget, setStageModalTarget] = useState(null); // { farmer, stageKey, isEdit }
 
   // Redirect officers directly to their own home page (workstation dashboard) on login or role switch
   useEffect(() => {
@@ -74,6 +76,19 @@ function MainLayout() {
     setSelectedFarmerId(farmerId);
   };
 
+  const handleOpenStageModal = (farmer, stageKey, isEdit = false) => {
+    setStageModalTarget({ farmer, stageKey, isEdit });
+  };
+
+  const handleStageModalSubmit = (farmerId, stageKey, payload, isEdit) => {
+    if (isEdit) {
+      updateStageData(farmerId, stageKey, payload);
+    } else {
+      completeStage(farmerId, stageKey, payload);
+    }
+    setStageModalTarget(null);
+  };
+
   const renderTabContent = () => {
     // Non-admin officers redirected to their workstation home page if accessing admin-only sections
     if (currentDemoRole !== ROLES.ADMIN && currentTab === "batch-capacity") {
@@ -83,6 +98,7 @@ function MainLayout() {
           onOpenReschedule={handleOpenReschedule}
           onOpenFlag={handleOpenFlag}
           onOpenFarmerDetails={handleOpenFarmerDetails}
+          onOpenStageModal={handleOpenStageModal}
         />
       );
     }
@@ -95,6 +111,7 @@ function MainLayout() {
             onOpenReschedule={handleOpenReschedule}
             onOpenFlag={handleOpenFlag}
             onOpenFarmerDetails={handleOpenFarmerDetails}
+            onOpenStageModal={handleOpenStageModal}
           />
         );
       case "batch-capacity":
@@ -106,6 +123,7 @@ function MainLayout() {
             onOpenReschedule={handleOpenReschedule}
             onOpenFlag={handleOpenFlag}
             onOpenFarmerDetails={handleOpenFarmerDetails}
+            onOpenStageModal={handleOpenStageModal}
           />
         );
       case "history":
@@ -119,6 +137,7 @@ function MainLayout() {
             onOpenReschedule={handleOpenReschedule}
             onOpenFlag={handleOpenFlag}
             onOpenFarmerDetails={handleOpenFarmerDetails}
+            onOpenStageModal={handleOpenStageModal}
           />
         );
     }
@@ -174,6 +193,18 @@ function MainLayout() {
           onClose={() => setFlagTarget(null)}
           farmer={flagTarget.farmer}
           stageKey={flagTarget.stageKey}
+        />
+      )}
+
+      {/* Stage Input Modal */}
+      {stageModalTarget && (
+        <StageInputModal
+          isOpen={!!stageModalTarget}
+          onClose={() => setStageModalTarget(null)}
+          farmer={stageModalTarget.farmer}
+          stageKey={stageModalTarget.stageKey}
+          isEdit={stageModalTarget.isEdit}
+          onSubmit={handleStageModalSubmit}
         />
       )}
 

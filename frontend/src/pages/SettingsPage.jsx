@@ -110,25 +110,20 @@ export const SettingsPage = () => {
           <span>Primary Operating Slots Summary</span>
         </h3>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs">
             <h4 className="font-bold text-slate-900 text-sm">Morning Slot</h4>
-            <p className="text-slate-500 mt-0.5">Main Operating Hours: 7:00 AM – 10:00 AM</p>
-            <ul className="mt-2 space-y-1 text-slate-700">
-              <li>• Batch 1 (07:00 - 08:00)</li>
-              <li>• Batch 2 (08:00 - 09:00)</li>
-              <li>• Batch 3 (09:00 - 10:00)</li>
-            </ul>
+            <p className="text-slate-500 mt-0.5">Operating Hours: 07:00 AM – 10:00 AM</p>
           </div>
 
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs">
             <h4 className="font-bold text-slate-900 text-sm">Afternoon Slot</h4>
-            <p className="text-slate-500 mt-0.5">Main Operating Hours: 12:00 PM – 3:00 PM</p>
-            <ul className="mt-2 space-y-1 text-slate-700">
-              <li>• Batch 1 (12:00 - 13:00)</li>
-              <li>• Batch 2 (13:00 - 14:00)</li>
-              <li>• Batch 3 (14:00 - 15:00)</li>
-            </ul>
+            <p className="text-slate-500 mt-0.5">Operating Hours: 12:00 PM – 03:00 PM</p>
+          </div>
+
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+            <h4 className="font-bold text-slate-900 text-sm">Evening Slot</h4>
+            <p className="text-slate-500 mt-0.5">Operating Hours: 05:00 PM – 08:00 PM</p>
           </div>
         </div>
       </div>

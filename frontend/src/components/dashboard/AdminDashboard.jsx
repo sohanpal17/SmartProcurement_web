@@ -19,12 +19,12 @@ export const AdminDashboard = ({ onNavigateTab, onOpenFarmerDetails }) => {
   const { farmers, centres, selectedCentreId } = useApp();
 
   const currentCentre = centres.find((c) => c.id === selectedCentreId) || centres[0];
-  const maxDailyCap = currentCentre?.dailyCapacity || 100;
+  const maxDailyCap = currentCentre?.dailyCapacity || 90;
 
   const todaysBookings = farmers.length;
-  const waitingCount = farmers.filter((f) => f.status === "BOOKED" || f.status === "ARRIVED").length;
+  const waitingCount = farmers.filter((f) => f.status === "BOOKED" || f.status === "ARRIVED" || f.status === "ARRIVAL" || f.currentStage === "arrival").length;
   const currentlyProcessing = farmers.filter((f) =>
-    ["WEIGHING", "QUALITY", "PROCUREMENT"].includes(f.status)
+    ["WEIGHING", "QUALITY"].includes(f.status) || f.currentStage === "weighing" || f.currentStage === "quality"
   ).length;
   const completedProcurements = farmers.filter((f) => f.status === "COMPLETED" || f.currentStage === "payment").length;
   const availableSlots = Math.max(0, maxDailyCap - todaysBookings);
@@ -36,9 +36,6 @@ export const AdminDashboard = ({ onNavigateTab, onOpenFarmerDetails }) => {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-slate-900">Centre Operations Command Dashboard</h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> MSP Procurement Active
-            </span>
           </div>
           <p className="text-xs text-slate-500 mt-1 font-medium">
             Department of Agricultural Marketing — Government Procurement Portal

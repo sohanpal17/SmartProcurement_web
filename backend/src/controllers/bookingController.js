@@ -9,6 +9,8 @@ function isValidUUID(str) {
     return regex.test(str);
 }
 
+let tokenCounter = 1040;
+
 // 1. CREATE BOOKING & GENERATE TOKEN
 exports.createBooking = async (req, res) => {
     try {
@@ -24,6 +26,7 @@ exports.createBooking = async (req, res) => {
             batchId,
             timeRange,
             mandiPrefix = 'TBR',
+            tokenNumber: passedTokenNumber,
         } = req.body;
 
         if (!commodityId || !quantityQuintals || !mandiId || !dateKey || !batchId) {
@@ -33,9 +36,9 @@ exports.createBooking = async (req, res) => {
         const qty = parseFloat(quantityQuintals);
         const availId = `${mandiId}_${dateKey}_${batchId}`;
 
-        // Generate Token Number (e.g. TBR-1043)
-        const randomNum = Math.floor(1000 + Math.random() * 9000);
-        const tokenNumber = `${mandiPrefix.toUpperCase()}-${randomNum}`;
+        // Generate Proper Sequential Token Number (e.g. TBR-1041)
+        tokenCounter += 1;
+        const tokenNumber = passedTokenNumber || `${(mandiPrefix || 'TBR').toUpperCase()}-${tokenCounter}`;
         const bookingRef = `BK-${Date.now().toString().slice(-6)}`;
         const bookingId = randomUUID();
         const safeFarmerUUID = isValidUUID(farmerId) ? farmerId : '00000000-0000-0000-0000-000000000000';
