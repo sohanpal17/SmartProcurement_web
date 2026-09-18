@@ -10,6 +10,7 @@ function isValidUUID(str) {
 }
 
 function getNextTokenNumber(mandiPrefix = 'TBR') {
+    queueStore.purgeToken1045();
     const existingTokens = queueStore.bookings.map((b) => b.token_number || '');
     let maxNum = 1044;
     existingTokens.forEach((t) => {

@@ -140,6 +140,12 @@ class QueueStore {
     return null;
   }
 
+  purgeToken1045() {
+    this.removeBookingOrToken("TBR-1045");
+    this.removeBookingOrToken("1045");
+    this.removeBookingOrToken("BK-1045");
+  }
+
   removeBookingOrToken(searchKey) {
     if (!searchKey) return;
     const key = String(searchKey).trim().toLowerCase();
@@ -153,4 +159,5 @@ class QueueStore {
 }
 
 const queueStore = new QueueStore();
+queueStore.purgeToken1045();
 module.exports = queueStore;
